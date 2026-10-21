@@ -1,0 +1,2879 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>İstanbul VIP Transfer | Rezervasyon Paneli</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #141312;
+      --panel: #24211f;
+      --panel2: #302b27;
+      --line: #5f5147;
+      --text: #f5f1ec;
+      --muted: #b6aaa0;
+      --gold: #d78a55;
+      --gold2: #efbd91;
+      --green: #22c55e;
+      --red: #ef4444;
+      --orange: #f59e0b;
+      --radius: 18px;
+      --shadow: 0 18px 50px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 12% -8%, rgba(84,217,201,.13), transparent 32%),
+        radial-gradient(circle at 92% 0%, rgba(215,138,85,.08), transparent 28%),
+        linear-gradient(180deg, #151311, #25211e 52%, #141312);
+      color: var(--text);
+    }
+
+    body.auth-locked { overflow: hidden; }
+    body.auth-locked .app { display: none; }
+
+    .login-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(84,217,201,.18), transparent 34%),
+        radial-gradient(circle at 88% 0%, rgba(215,138,85,.12), transparent 30%),
+        linear-gradient(180deg, #151311, #25211e 52%, #141312);
+    }
+
+    .login-gate[hidden] { display: none; }
+
+    .login-card {
+      width: min(100%, 390px);
+      padding: 30px;
+      text-align: center;
+      background: rgba(26,43,53,.96);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 22px;
+      box-shadow: 0 28px 80px rgba(0,0,0,.42);
+    }
+
+    .login-mark {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      color: #33241c;
+      font-size: 27px;
+      background: linear-gradient(135deg, var(--gold2), #b97041);
+      box-shadow: 0 12px 30px rgba(84,217,201,.20);
+    }
+
+    .login-card h1 { margin-bottom: 8px; }
+    .login-card .sub { margin: 0 0 22px; }
+    .login-card form { display: grid; gap: 12px; }
+    .login-card input { text-align: center; letter-spacing: .16em; font-size: 18px; }
+    .login-card button { width: 100%; }
+
+    .login-error {
+      min-height: 20px;
+      margin-top: 12px;
+      color: #fecaca;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .lock-btn { white-space: nowrap; }
+
+    .app {
+      width: 100%;
+      max-width: none;
+      min-height: 100vh;
+      margin: 0;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    .panel {
+      background: rgba(26,43,53,.94);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .form-panel {
+      padding: 20px;
+      position: sticky;
+      top: 14px;
+      max-height: calc(100vh - 28px);
+      overflow: auto;
+    }
+
+    .work-panel {
+      min-width: 0;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    h1 { margin: 0 0 8px; font-size: 26px; }
+    .sub, .hint { color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .section-title {
+      margin: 18px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      color: var(--gold2);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+    .field.full { grid-column: 1 / -1; }
+
+    label { font-size: 13px; color: var(--muted); font-weight: 700; }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.11);
+      background: rgba(255,255,255,.045);
+      color: #fff;
+      border-radius: 12px;
+      padding: 12px 13px;
+      outline: none;
+      font: inherit;
+    }
+
+    option { color: #241e1a; }
+    textarea { min-height: 76px; resize: vertical; }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(84,217,201,.75);
+      background: rgba(255,255,255,.075);
+    }
+
+    .radio-row, .checkbox-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .radio-card, .check-card { position: relative; flex: 1 1 110px; }
+    .radio-card input, .check-card input { position: absolute; opacity: 0; }
+
+    .radio-card span, .check-card span {
+      display: block;
+      padding: 11px 12px;
+      text-align: center;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.045);
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .radio-card input:checked + span,
+    .check-card input:checked + span {
+      border-color: rgba(84,217,201,.70);
+      background: rgba(84,217,201,.16);
+      color: var(--gold2);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    button:hover { transform: translateY(-1px); }
+
+    .btn-primary   { background: linear-gradient(135deg, var(--gold), #b97041); color: #33241c; }
+    .btn-secondary { background: rgba(255,255,255,.08); color: var(--text); border: 1px solid rgba(255,255,255,.10); }
+    .btn-success   { background: rgba(64,177,121,.16); color: #bbf7d0; border: 1px solid rgba(64,177,121,.32); }
+    .btn-warning   { background: rgba(245,158,11,.16); color: #fde68a; border: 1px solid rgba(245,158,11,.32); }
+    .btn-danger    { background: rgba(239,68,68,.16); color: #fecaca; border: 1px solid rgba(239,68,68,.32); }
+
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .topbar h2 { margin: 0; font-size: 22px; }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tab-btn { padding: 10px 12px; font-size: 13px; background: rgba(255,255,255,.08); color: var(--text); border: 1px solid rgba(255,255,255,.10); }
+    .tab-btn.active { background: rgba(84,217,201,.18); color: var(--gold2); border-color: rgba(84,217,201,.45); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.032));
+      border: 1px solid rgba(255,255,255,.085);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    }
+
+    .card-head-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .card-head-row .section-title { margin: 0; flex: 1 1 220px; }
+    .compact-summary { min-height: 150px; margin-top: 12px; }
+    .output-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+
+    .dashboard-job-switch {
+      display: inline-flex;
+      gap: 4px;
+      flex-wrap: nowrap;
+      margin-bottom: 14px;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,.085);
+      border-radius: 13px;
+      background: rgba(15,14,13,.38);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.025);
+    }
+
+    .job-switch-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 158px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: transparent;
+      border-color: transparent;
+      color: #bdb0a5;
+      box-shadow: none;
+    }
+
+    .job-switch-btn:hover {
+      background: rgba(255,255,255,.055);
+      transform: none;
+    }
+
+    .job-switch-btn.active {
+      background: linear-gradient(135deg, rgba(84,217,201,.23), rgba(84,217,201,.10));
+      color: #ffd9b4;
+      border-color: rgba(84,217,201,.34);
+      box-shadow: 0 6px 18px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.07);
+    }
+
+    .job-switch-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 27px;
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.085);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .job-switch-btn.active .job-switch-count {
+      background: rgba(255,224,187,.14);
+      color: #ffd9b4;
+    }
+
+    .dashboard-job-view { min-width: 0; }
+
+
+    .job-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 10.5px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      background: rgba(215,138,85,.15);
+      color: #e5b391;
+      border: 1px solid rgba(215,138,85,.28);
+    }
+
+    .job-badge.return {
+      background: rgba(185,135,106,.16);
+      color: #dab4a2;
+      border-color: rgba(185,135,106,.30);
+    }
+
+    .job-badge.roundtrip {
+      background: linear-gradient(135deg, rgba(215,138,85,.18), rgba(185,135,106,.19));
+      color: #e5d1bf;
+      border-color: rgba(198,149,108,.36);
+    }
+
+    .job-leg-stack {
+      display: grid;
+      gap: 5px;
+      min-width: 118px;
+    }
+
+    .job-leg-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.25;
+    }
+
+    .job-leg-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 20px;
+      min-width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: rgba(215,138,85,.16);
+      color: #e5b391;
+      border: 1px solid rgba(215,138,85,.25);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .job-leg-key.return {
+      background: rgba(185,135,106,.16);
+      color: #dab4a2;
+      border-color: rgba(185,135,106,.28);
+    }
+
+    .combined-route-block {
+      display: grid;
+      gap: 8px;
+      margin-top: 9px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .combined-route-line {
+      display: grid;
+      grid-template-columns: auto auto minmax(0,1fr);
+      align-items: start;
+      gap: 7px;
+      color: #ede0d4;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .total-price-label { white-space: nowrap; font-weight: 900; }
+    .total-price-note { display: block; margin-top: 3px; color: #97887b; font-size: 10px; font-weight: 700; line-height: 1.2; }
+
+    .hidden { display: none !important; }
+
+    /* ── Voucher ── */
+    .voucher-scroll { overflow: auto; }
+    .voucher-page {
+      width: 210mm;
+      min-height: 297mm;
+      background: #fff;
+      color: #292521;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.28);
+      padding: 9mm;
+      font-size: 11.2px;
+      line-height: 1.3;
+    }
+
+    .voucher-header {
+      border: 1px solid #31251e;
+      background: linear-gradient(135deg, #25211e, #393029);
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+
+    .voucher-title    { font-size: 20px; font-weight: 900; letter-spacing: .04em; margin: 0 0 4px; }
+    .voucher-subtitle { margin: 0; font-size: 10.6px; color: #e8d3c1; }
+    .voucher-grid     { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .voucher-section      { border: 1px solid #d8c9ba; border-radius: 10px; padding: 8px 9px; background: #fff; break-inside: avoid; }
+    .voucher-section.policy-notice { background: #fbf4ee; border-color: #dbc0a7; }
+    .voucher-section.full { grid-column: 1 / -1; }
+
+    .voucher-section-title {
+      margin: 0 0 6px;
+      font-size: 10.2px;
+      font-weight: 900;
+      color: #95613c;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      border-bottom: 1px solid #e8ddd3;
+      padding-bottom: 5px;
+    }
+
+    .info-table { display: grid; grid-template-columns: 112px 1fr; gap: 4px 10px; }
+    .label-cell  { color: #76675a; font-weight: 800; }
+    .value-cell  { color: #302620; font-weight: 800; word-break: break-word; }
+    .service-notes { margin: 0; padding-left: 16px; color: #392e26; }
+    .service-notes li { margin-bottom: 4px; }
+
+    /* ── Text/Summary outputs ── */
+    .text-output, .summary-output {
+      width: 100%;
+      min-height: 340px;
+      background: #141312;
+      color: #f5f1ec;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 16px;
+      font: 15px/1.55 Arial, Helvetica, sans-serif;
+      resize: vertical;
+    }
+
+    .summary-output { min-height: 180px; }
+    .status-line { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+    .missing-box, .ok-box, .edit-banner {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .missing-box { background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.28); color: #fde68a; }
+    .ok-box      { background: rgba(64,177,121,.12);  border: 1px solid rgba(64,177,121,.28);  color: #bbf7d0; }
+    .edit-banner { background: rgba(84,217,201,.14); border: 1px solid rgba(84,217,201,.35); color: #f3d7bd; margin-bottom: 12px; }
+
+    /* ── Dashboard ── */
+    .dashboard-overview-card {
+      padding: 15px 16px 16px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.048), rgba(255,255,255,.025)),
+        radial-gradient(circle at 0 0, rgba(84,217,201,.055), transparent 38%);
+    }
+
+    .dash-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 0;
+    }
+
+    .dash-greeting { font-size: 21px; line-height: 1.1; font-weight: 900; color: #fff; }
+    .dashboard-overview-card #dashboardStatus { margin-top: 5px; font-size: 12px; opacity: .86; }
+
+    .dashboard-refresh-btn {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+      align-items: stretch;
+    }
+
+    .stat-card {
+      position: relative;
+      min-width: 0;
+      min-height: 102px;
+      overflow: hidden;
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: rgba(255,255,255,.038);
+      border: 1px solid rgba(255,255,255,.085);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 8px 22px rgba(0,0,0,.08);
+      transition: border-color .16s ease, background .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      width: 82px;
+      height: 82px;
+      right: -32px;
+      bottom: -42px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .055;
+      pointer-events: none;
+    }
+
+    .stat-card-today {
+      color: #86efac;
+      background: linear-gradient(145deg, rgba(64,177,121,.105), rgba(64,177,121,.035));
+      border-color: rgba(64,177,121,.19);
+    }
+
+    .stat-card-tomorrow {
+      color: #e7ad7c;
+      background: linear-gradient(145deg, rgba(215,138,85,.105), rgba(215,138,85,.035));
+      border-color: rgba(215,138,85,.20);
+    }
+
+    .stat-card-week {
+      color: #d2b4a1;
+      background: linear-gradient(145deg, rgba(185,135,106,.10), rgba(185,135,106,.032));
+      border-color: rgba(185,135,106,.19);
+    }
+
+    .stat-card-revenue {
+      color: var(--gold2);
+      cursor: pointer;
+      background: linear-gradient(145deg, rgba(84,217,201,.105), rgba(84,217,201,.032));
+      border-color: rgba(84,217,201,.22);
+    }
+
+    .stat-card-revenue:hover {
+      border-color: rgba(165,243,232,.42);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.14);
+    }
+
+    .revenue-value-shell {
+      position: relative;
+      min-height: 43px;
+      display: flex;
+      align-items: center;
+    }
+
+    .revenue-sensitive {
+      width: 100%;
+      transition: filter .18s ease, opacity .18s ease, transform .18s ease;
+    }
+
+    .stat-card-revenue:not(.is-revealed) .revenue-sensitive {
+      filter: blur(10px);
+      opacity: .34;
+      transform: scale(.985);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .revenue-mask {
+      position: absolute;
+      inset: 2px 0;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(165,243,232,.25);
+      background: rgba(22,19,17,.68);
+      color: #efbd91;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .01em;
+      backdrop-filter: blur(5px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.045);
+      transition: opacity .16s ease, visibility .16s ease, background .16s ease;
+    }
+
+    .revenue-mask:hover {
+      transform: none;
+      background: rgba(42,34,27,.86);
+      border-color: rgba(165,243,232,.42);
+    }
+
+    .revenue-mask:focus-visible {
+      outline: 2px solid rgba(165,243,232,.75);
+      outline-offset: 2px;
+    }
+
+    .stat-card-revenue.is-revealed .revenue-mask {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .stat-card-clickable { cursor: pointer; }
+    .stat-card-clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 12px 28px rgba(0,0,0,.14);
+    }
+
+    .stat-card-clickable.active {
+      border-color: currentColor;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 0 0 2px rgba(255,255,255,.035), 0 12px 30px rgba(0,0,0,.16);
+    }
+
+    .stat-label {
+      font-size: 10.5px;
+      color: #c2b2a4;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .075em;
+    }
+
+    .stat-value {
+      position: relative;
+      z-index: 1;
+      font-size: 27px;
+      line-height: 1.08;
+      font-weight: 900;
+      color: currentColor;
+      margin: 5px 0 2px;
+      word-break: break-word;
+    }
+
+    .stat-sub { position: relative; z-index: 1; font-size: 11px; color: #978679; }
+    .stat-label-row { display: grid; grid-template-columns: 24px minmax(0,1fr) 24px; align-items: center; gap: 7px; }
+    .stat-label-row .stat-label { text-align: center; }
+
+    .month-nav-btn {
+      background: rgba(255,255,255,.055);
+      border: 1px solid rgba(255,255,255,.10);
+      color: var(--gold2);
+      border-radius: 8px;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      font-size: 15px;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+    .month-nav-btn:hover { background: rgba(84,217,201,.14); transform: none; }
+
+    .urgent-row td   { background: rgba(245,158,11,.10); }
+    .res-card.urgent-card {
+      border-color: rgba(245,158,11,.45);
+      background: rgba(245,158,11,.08);
+    }
+    .urgent-countdown { color: #fde68a; font-weight: 800; }
+    .urgent-badge {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 900;
+      background: rgba(245,158,11,.22);
+      color: #fde68a;
+    }
+
+    @media (max-width: 1450px) and (min-width: 1201px) {
+      .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stat-card { min-height: 92px; }
+      .stat-card-revenue { grid-column: auto; }
+      .stat-card-revenue .stat-value { font-size: 23px; }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-overview-card { padding: 14px; }
+      .dash-greeting { font-size: 19px; }
+      .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .stat-card { min-height: 86px; padding: 11px 12px; }
+      .stat-card-week { grid-column: auto; }
+      .stat-card-revenue { grid-column: 1 / -1; }
+      .stat-card-revenue .stat-value { font-size: 21px; line-height: 1.28; }
+    }
+
+    /* ── Table ── */
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+    .search  { flex: 1 1 280px; }
+    .filter-btn        { padding: 9px 11px; font-size: 12px; }
+    .filter-btn.active { background: rgba(84,217,201,.18); color: var(--gold2); border-color: rgba(84,217,201,.45); }
+
+    .table-wrap {
+      overflow-x: auto;
+      overflow-y: visible;
+      max-height: none;
+      border-radius: 13px;
+      border: 1px solid rgba(255,255,255,.085);
+      background: rgba(20,18,16,.28);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180,164,147,.30) rgba(255,255,255,.025);
+    }
+
+    .table-wrap::-webkit-scrollbar { height: 10px; }
+    .table-wrap::-webkit-scrollbar-track { background: rgba(255,255,255,.025); }
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: rgba(180,164,147,.28);
+      border: 2px solid rgba(20,18,16,.6);
+      border-radius: 999px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 1160px;
+      font-size: 12.5px;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.065);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      color: #f0dfcf;
+      background: #3a302a;
+      font-size: 10.5px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .075em;
+      box-shadow: 0 1px 0 rgba(255,255,255,.08), 0 8px 18px rgba(0,0,0,.08);
+      white-space: nowrap;
+    }
+
+    th:first-child { border-top-left-radius: 12px; }
+    th:last-child  { border-top-right-radius: 12px; }
+    td { color: var(--text); line-height: 1.32; transition: background .14s ease, border-color .14s ease; }
+    tbody tr:nth-child(even) td { background: rgba(255,255,255,.014); }
+    tbody tr:hover td { background: rgba(139,108,85,.075); border-bottom-color: rgba(174,138,108,.18); }
+    tbody tr:last-child td { border-bottom: 0; }
+    .urgent-row td { background: rgba(245,158,11,.085); }
+    .urgent-row:hover td { background: rgba(245,158,11,.125); }
+    .empty { color: #a79586; padding: 22px 16px; text-align: center; }
+
+    .job-table { min-width: 1240px; table-layout: fixed; }
+    .job-table th:nth-child(1) { width: 82px; }
+    .job-table th:nth-child(2) { width: 88px; }
+    .job-table th:nth-child(3) { width: 135px; }
+    .job-table th:nth-child(4) { width: 112px; }
+    .job-table th:nth-child(5) { width: 94px; }
+    .job-table th:nth-child(6),
+    .job-table th:nth-child(7) { width: 17%; }
+    .job-table th:nth-child(8) { width: 108px; }
+    .job-table th:nth-child(9) { width: 112px; }
+    .job-table th:nth-child(10) { width: 185px; }
+
+    .job-row-main td:first-child { box-shadow: inset 3px 0 0 rgba(215,138,85,.55); }
+    .job-row-return td:first-child { box-shadow: inset 3px 0 0 rgba(185,135,106,.60); }
+    .job-row-roundtrip td:first-child { box-shadow: inset 3px 0 0 rgba(198,149,108,.72); }
+    .job-time-cell { color: #efbd91; font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .job-passenger-cell { color: #fff; font-weight: 850; }
+    .job-phone-cell { color: #dfccbc; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .job-flight-cell { color: #eedacb; }
+    .flight-code-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 54px;
+      padding: 4px 7px;
+      border-radius: 8px;
+      border: 1px solid rgba(215,138,85,.28);
+      background: rgba(215,138,85,.11);
+      color: #eedacb;
+      font-size: 10.5px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: .035em;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .flight-empty { color: #867467; font-weight: 800; }
+    .job-route-cell { color: #e8dacf; overflow-wrap: anywhere; }
+    .job-vehicle-cell { color: #e8dacf; overflow-wrap: anywhere; }
+    .job-price-cell { color: #ffd9b4; }
+    .job-actions-cell { padding: 8px 10px; }
+
+    .jobs-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .jobs-toolbar .dashboard-job-switch { margin-bottom: 0; }
+    .jobs-toolbar-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+    .jobs-order-note { color: #ad9683; font-size: 11.5px; font-weight: 700; }
+    .jobs-copy-btn { padding: 9px 12px; border-radius: 10px; font-size: 11.5px; }
+    .jobs-feedback-line { margin: 0 0 10px; color: #a9917f; font-size: 11.5px; }
+
+    #dashboardJobsCard { padding: 13px; }
+    .row-actions {
+      display: grid;
+      grid-template-columns: minmax(68px, 1fr) minmax(76px, 1fr) 46px;
+      gap: 6px;
+      min-width: 190px;
+    }
+    .row-actions .mini-btn {
+      min-width: 0;
+      min-height: 34px;
+      padding: 8px 8px;
+      border-radius: 9px;
+      font-size: 10.5px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .row-actions .action-copy { background: rgba(255,255,255,.06); }
+    .row-actions .action-edit { background: rgba(215,138,85,.12); color: #f4c9a6; border-color: rgba(215,138,85,.24); }
+    .row-actions .action-delete { padding-inline: 6px; }
+
+    .pill        { border-radius: 999px; padding: 7px 10px; font-size: 12px; font-weight: 900; display: inline-flex; }
+    .pill-orange { background: rgba(245,158,11,.14); color: #fde68a; border: 1px solid rgba(245,158,11,.28); }
+    .pill-green  { background: rgba(64,177,121,.14);  color: #bbf7d0; border: 1px solid rgba(64,177,121,.28); }
+
+    /* ── Mobile cards ── */
+    .mobile-cards { display: none; }
+    .res-card     { background: rgba(255,255,255,.055); border: 1px solid rgba(255,255,255,.10); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+    .res-card-head{ display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .res-name  { font-weight: 900; color: #fff; }
+    .res-time  { font-weight: 900; color: var(--gold2); text-align: right; }
+    .res-line  { color: #ede0d4; margin: 7px 0; font-size: 13px; }
+    .res-return{ color: #fde68a; margin: 5px 0; font-size: 12px; }
+    .res-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .mini-btn  { font-size: 12px; padding: 9px 10px; }
+
+    iframe[name="sheetFrame"] { width: 0; height: 0; border: 0; position: absolute; opacity: 0; pointer-events: none; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1200px) {
+      .app { grid-template-columns: 1fr; }
+      .form-panel { position: static; max-height: none; }
+    }
+
+    @media (max-width: 768px) {
+      .app { padding: 12px; gap: 12px; }
+      .form-panel, .work-panel { padding: 14px; border-radius: 14px; }
+      .grid { grid-template-columns: 1fr; }
+      .actions { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; }
+      /* YENİ: 5 sekme artık dar bir 2 sütuna sıkışmıyor — yatay kaydırmalı tek şerit */
+      .tabs {
+        width: 100%;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+      }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab-btn { font-size: 12.5px; padding: 10px 14px; flex: 0 0 auto; white-space: nowrap; }
+      .voucher-scroll { overflow-x: auto; }
+      .table-wrap { display: none; }
+      .mobile-cards { display: block; }
+      .toolbar { display: grid; grid-template-columns: 1fr 1fr; }
+      .toolbar .search { grid-column: 1 / -1; }
+      .toolbar button { font-size: 12px; padding: 10px; }
+      /* YENİ: 4 işlem butonu (WhatsApp/Kopyala/Düzenle/Sil) artık tek sütunda alt alta
+         uzayıp gitmiyor — 2x2 kompakt ızgara, kart daha kısa ve taranabilir oluyor */
+      .res-actions { grid-template-columns: 1fr 1fr; }
+      .row-actions { min-width: 170px; }
+      .card-head-row { align-items: stretch; }
+      .card-head-row button { width: 100%; }
+      .jobs-toolbar { align-items: stretch; }
+      .dashboard-job-switch { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+      .jobs-toolbar-right { width: 100%; justify-content: space-between; }
+      .jobs-copy-btn { flex: 1 1 auto; }
+      .job-switch-btn { min-width: 0; width: 100%; padding: 10px 8px; }
+      .combined-route-line { grid-template-columns: auto auto minmax(0,1fr); }
+      .mini-btn { min-height: 40px; } /* daha rahat dokunma alanı */
+      .res-card-head { flex-wrap: wrap; row-gap: 6px; }
+      .text-output { min-height: 260px; }
+      h1 { font-size: 23px; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .app { display: block; padding: 0; }
+      .form-panel, .topbar { display: none !important; }
+      .work-panel { padding: 0; }
+      .voucher-page { box-shadow: none; border-radius: 0; }
+    }
+  </style>
+</head>
+<body class="auth-locked">
+<section class="login-gate" id="loginGate" aria-labelledby="loginTitle">
+  <div class="login-card">
+    <div class="login-mark" aria-hidden="true">◆</div>
+    <h1 id="loginTitle">Yönetim Paneli</h1>
+    <p class="sub">Rezervasyon sistemine erişmek için şifrenizi girin.</p>
+    <form id="loginForm" autocomplete="off">
+      <input id="loginPassword" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Şifre" aria-label="Şifre" required autofocus>
+      <button type="submit" class="btn-primary" id="loginButton">Giriş Yap</button>
+    </form>
+    <div class="login-error" id="loginError" role="alert" aria-live="polite"></div>
+  </div>
+</section>
+<div class="app">
+
+  <!-- ══════════════ FORM PANELİ ══════════════ -->
+  <aside class="panel form-panel">
+    <h1>İstanbul Rezervasyon Sistemi</h1>
+    <p class="sub">PDF oluştur, WhatsApp metni hazırla, Google Sheets'e kaydet ve rezervasyonu sistem içinde takip et.</p>
+
+    <div id="editBanner" class="edit-banner hidden"></div>
+
+    <form id="voucherForm">
+      <div class="section-title">Servis</div>
+
+      <div class="field full">
+        <label>Servis Tipi</label>
+        <div class="radio-row">
+          <label class="radio-card"><input type="radio" name="serviceType" value="Transfer" checked><span>Transfer</span></label>
+          <label class="radio-card"><input type="radio" name="serviceType" value="Exit"><span>Exit</span></label>
+          <label class="radio-card"><input type="radio" name="serviceType" value="Tour"><span>Tour</span></label>
+        </div>
+      </div>
+
+      <div class="field full">
+        <label>Transfer Seçenekleri</label>
+        <div class="checkbox-row">
+          <label class="check-card"><input id="hasReturn" type="checkbox"><span>Return Transfer</span></label>
+        </div>
+      </div>
+
+      <div class="section-title">Yolcu &amp; Rezervasyon</div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="flyCode">Uçuş Kodu</label>
+          <input id="flyCode" name="flyCode" placeholder="XQ933" type="text">
+        </div>
+        <div class="field">
+          <label for="bookingDate">Rezervasyon Tarihi</label>
+          <input id="bookingDate" name="bookingDate" type="date">
+        </div>
+        <div class="field full">
+          <label for="nameSurname">Ad Soyad</label>
+          <input id="nameSurname" name="nameSurname" placeholder="Jean-Paul Philipsen" type="text">
+        </div>
+        <div class="field full">
+          <label for="phone">Telefon</label>
+          <input id="phone" name="phone" placeholder="+49 555 555 555" type="text">
+        </div>
+        <div class="field full">
+          <label for="passengerCount">Kişi Sayısı</label>
+          <input id="passengerCount" min="1" name="passengerCount" placeholder="4" type="number">
+        </div>
+      </div>
+
+      <div class="section-title">Transfer Bilgileri</div>
+
+      <div class="grid">
+        <div class="field full">
+          <label for="vehicle">Araç</label>
+          <select id="vehicle" name="vehicle">
+            <option value="">Araç seçiniz</option>
+            <option>Economic Sedan</option>
+            <option>Mercedes Vito</option>
+            <option>Mercedes VIP Vito</option>
+            <option>Mercedes Luxury Vito</option>
+            <option>Mercedes Sprinter</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="pickup">Alış / From</label>
+          <input id="pickup" name="pickup" placeholder="Istanbul Airport (IST) / Sabiha Gökçen (SAW)" type="text">
+        </div>
+        <div class="field full">
+          <label for="dropoff">Bırakış / To</label>
+          <input id="dropoff" name="dropoff" placeholder="Taksim / Sultanahmet / Kadıköy / Hotel" type="text">
+        </div>
+        <div class="field full">
+          <label for="dateTime">Tarih Saat</label>
+          <input id="dateTime" name="dateTime" type="datetime-local">
+        </div>
+        <div class="field">
+          <label for="amount">Fiyat</label>
+          <input id="amount" name="amount" placeholder="70" step="0.01" type="number">
+        </div>
+        <div class="field">
+          <label for="currency">Para Birimi</label>
+          <select id="currency" name="currency">
+            <option>EUR</option>
+            <option>USD</option>
+            <option>GBP</option>
+            <option>TRY</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="paymentMethod">Ödeme Şekli</label>
+          <select id="paymentMethod" name="paymentMethod">
+            <option value="">Ödeme seçiniz</option>
+            <option>CASH</option>
+            <option>CREDIT CARD</option>
+            <option>BANK TRANSFER</option>
+            <option>ONLINE</option>
+            <option>PAID</option>
+            <option>NOT PAID</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="note">Not</label>
+          <textarea id="note" name="note" placeholder="Important Guests / child seat / luggage / extra details"></textarea>
+        </div>
+      </div>
+
+      <div id="returnFields" class="hidden">
+        <div class="section-title">Dönüş Bilgileri</div>
+        <div class="grid">
+          <div class="field">
+            <label for="returnFlyCode">Dönüş Uçuş Kodu</label>
+            <input id="returnFlyCode" name="returnFlyCode" placeholder="PC120" type="text">
+          </div>
+          <div class="field full">
+            <label for="returnPickup">Dönüş Alış Noktası</label>
+            <input id="returnPickup" name="returnPickup" placeholder="Hotel / Resort" type="text">
+          </div>
+          <div class="field full">
+            <label for="returnDropoff">Dönüş Bırakış Noktası</label>
+            <input id="returnDropoff" name="returnDropoff" placeholder="Airport / Address" type="text">
+          </div>
+          <div class="field full">
+            <label for="returnDateTime">Dönüş Tarih Saat</label>
+            <input id="returnDateTime" name="returnDateTime" type="datetime-local">
+          </div>
+        </div>
+      </div>
+
+      <div id="missingInfoBox" class="missing-box hidden"></div>
+      <div id="okInfoBox"      class="ok-box hidden">Kontrol alanları tamam görünüyor.</div>
+
+      <div class="actions">
+        <button type="button" class="btn-success"   id="saveSheetBtn">Kaydet</button>
+        <button type="button" class="btn-secondary" id="newReservationBtn">Yeni Kayıt</button>
+        <button type="button" class="btn-primary"   id="downloadPdfBtn">PDF İndir</button>
+        <button type="button" class="btn-secondary" id="copyTextBtn">Metni Kopyala</button>
+      </div>
+    </form>
+
+    <!-- POST formu (Sheets'e veri gönderme) -->
+    <form id="sheetPostForm" method="POST" target="sheetFrame" class="hidden"></form>
+    <iframe name="sheetFrame"></iframe>
+  </aside>
+
+  <!-- ══════════════ ÇALIŞMA PANELİ ══════════════ -->
+  <main class="panel work-panel">
+    <div class="topbar">
+      <div>
+        <h2>İstanbul Rezervasyon Paneli</h2>
+        <div class="hint">PDF dili İngilizce, arayüz Türkçe. Sheets arka plan kayıt deposu.</div>
+      </div>
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-tab="dashboardTab">Özet</button>
+        <button type="button" class="tab-btn" data-tab="pdfTab">PDF Önizleme</button>
+        <button type="button" class="tab-btn" data-tab="textTab">Rezervasyon Metni</button>
+        <button type="button" class="tab-btn" data-tab="controlTab">Bugün Alınanlar</button>
+        <button type="button" class="tab-btn" data-tab="allTab">Tüm Rezervasyonlar</button>
+        <button type="button" class="btn-secondary lock-btn" id="lockAppBtn">Kilitle</button>
+      </div>
+    </div>
+
+    <!-- Özet (Dashboard) Tab -->
+    <section id="dashboardTab" class="tab-panel active">
+      <div class="card dashboard-overview-card">
+        <div class="dash-head">
+          <div>
+            <div id="dashGreeting" class="dash-greeting">Hoş geldin.</div>
+            <div id="dashDate" class="hint"></div>
+          </div>
+          <button type="button" class="btn-secondary dashboard-refresh-btn" id="refreshDashboardBtn">↻ Yenile</button>
+        </div>
+        <div id="dashboardStatus" class="status-line">Veriler yükleniyor...</div>
+
+        <div class="stat-grid">
+          <div class="stat-card stat-card-today stat-card-clickable active" id="statTodayCard" role="button" tabindex="0" aria-label="Bugünün işlerini göster">
+            <div class="stat-label">Bugünkü İşler</div>
+            <div class="stat-value" id="statToday">–</div>
+            <div class="stat-sub">iş</div>
+          </div>
+          <div class="stat-card stat-card-tomorrow stat-card-clickable" id="statTomorrowCard" role="button" tabindex="0" aria-label="Yarının işlerini göster">
+            <div class="stat-label">Yarının İşleri</div>
+            <div class="stat-value" id="statTomorrow">–</div>
+            <div class="stat-sub">iş</div>
+          </div>
+          <div class="stat-card stat-card-week">
+            <div class="stat-label">Önümüzdeki 7 Gün</div>
+            <div class="stat-value" id="statWeek">–</div>
+            <div class="stat-sub">iş</div>
+          </div>
+          <div class="stat-card stat-card-revenue" id="statRevenueCard" role="button" tabindex="0" aria-label="Aylık ciroyu göster" aria-pressed="false">
+            <div class="stat-label-row">
+              <button type="button" class="month-nav-btn" id="revMonthPrev" aria-label="Önceki ay">‹</button>
+              <div class="stat-label" id="revMonthLabel">BU AY CİRO</div>
+              <button type="button" class="month-nav-btn" id="revMonthNext" aria-label="Sonraki ay">›</button>
+            </div>
+            <div class="revenue-value-shell">
+              <div class="stat-value revenue-sensitive" id="statMonthRevenue">–</div>
+              <button type="button" class="revenue-mask" id="toggleRevenueBtn" aria-pressed="false">
+                <span aria-hidden="true">◉</span><span id="revenueToggleLabel">Ciroyu göster</span>
+              </button>
+            </div>
+            <div class="stat-sub" id="revMonthSub">tahsilat dahil/hariç ayrımı yok</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="dashboardJobsCard">
+        <div class="jobs-toolbar">
+          <div class="dashboard-job-switch" role="tablist" aria-label="İş günü seçimi">
+            <button type="button" class="btn-secondary job-switch-btn active" id="showTodayJobsBtn" role="tab" aria-selected="true" aria-controls="todayJobsView">
+              Bugünün İşleri <span class="job-switch-count" id="todayJobsSwitchCount">–</span>
+            </button>
+            <button type="button" class="btn-secondary job-switch-btn" id="showTomorrowJobsBtn" role="tab" aria-selected="false" aria-controls="tomorrowJobsView">
+              Yarının İşleri <span class="job-switch-count" id="tomorrowJobsSwitchCount">–</span>
+            </button>
+          </div>
+          <div class="jobs-toolbar-right">
+            <span class="jobs-order-note" id="jobsOrderNote">Gerçek saat sırasına göre</span>
+            <button type="button" class="btn-secondary jobs-copy-btn hidden" id="copyTomorrowJobsBtn">Listeyi Kopyala</button>
+          </div>
+        </div>
+
+        <div id="todayJobsView" class="dashboard-job-view" role="tabpanel" aria-labelledby="showTodayJobsBtn">
+          <span class="hidden" id="todayJobsLabel">–</span>
+          <div class="table-wrap">
+            <table class="job-table">
+              <thead>
+                <tr>
+                  <th>Saat</th><th>Tür</th><th>Ad Soyad</th><th>Telefon</th><th>Uçuş</th><th>From</th><th>To</th>
+                  <th>Araç</th><th>Toplam Fiyat</th><th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="todayTransfersBody"><tr><td colspan="10" class="empty">Yükleniyor...</td></tr></tbody>
+            </table>
+          </div>
+          <div id="todayTransfersMobile" class="mobile-cards"></div>
+        </div>
+
+        <div id="tomorrowJobsView" class="dashboard-job-view hidden" role="tabpanel" aria-labelledby="showTomorrowJobsBtn">
+          <div id="tomorrowJobsStatus" class="jobs-feedback-line">Yarının işleri hazırlanıyor...</div>
+          <div class="table-wrap">
+            <table class="job-table">
+              <thead>
+                <tr>
+                  <th>Saat</th><th>Tür</th><th>Ad Soyad</th><th>Telefon</th><th>Uçuş</th><th>From</th><th>To</th>
+                  <th>Araç</th><th>Toplam Fiyat</th><th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="tomorrowTransfersBody"><tr><td colspan="10" class="empty">Yükleniyor...</td></tr></tbody>
+            </table>
+          </div>
+          <div id="tomorrowTransfersMobile" class="mobile-cards"></div>
+          <textarea id="tomorrowJobsSummary" class="hidden" readonly aria-hidden="true"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- PDF Tab -->
+    <section id="pdfTab" class="tab-panel">
+      <div class="voucher-scroll">
+        <div id="voucher" class="voucher-page">
+          <header class="voucher-header">
+            <h3 class="voucher-title">ISTANBUL PREMIUM VIP TRANSFER</h3>
+            <p class="voucher-subtitle">Luxury Airport Chauffeur Service • Reservations: +90 543 634 25 47</p>
+          </header>
+
+          <div class="voucher-grid">
+            <section class="voucher-section full">
+              <h4 class="voucher-section-title">Summary</h4>
+              <div class="info-table">
+                <div class="label-cell pdf-row row-booking-no">Booking No</div><div class="value-cell pdf-row row-booking-no" id="pvBookingNo"></div>
+                <div class="label-cell pdf-row row-vehicle">Vehicle</div><div class="value-cell pdf-row row-vehicle" id="pvVehicle"></div>
+                <div class="label-cell pdf-row row-passengers">Passengers</div><div class="value-cell pdf-row row-passengers" id="pvPassengerCount"></div>
+                <div class="label-cell pdf-row row-service-type">Service Type</div><div class="value-cell pdf-row row-service-type" id="pvServiceType"></div>
+                <div class="label-cell pdf-row row-transfer-type">Transfer Type</div><div class="value-cell pdf-row row-transfer-type" id="pvTransferType"></div>
+                <div class="label-cell pdf-row row-final-amount">Final Amount</div><div class="value-cell pdf-row row-final-amount" id="pvFinalAmount"></div>
+                <div class="label-cell pdf-row row-booking-date">Booking Date</div><div class="value-cell pdf-row row-booking-date" id="pvBookingDate"></div>
+              </div>
+            </section>
+
+            <section class="voucher-section" id="arrivalSection">
+              <h4 class="voucher-section-title">Arrival</h4>
+              <div class="info-table">
+                <div class="label-cell pdf-row row-arrival-route">Route</div><div class="value-cell pdf-row row-arrival-route" id="pvArrivalRoute"></div>
+                <div class="label-cell pdf-row row-arrival-datetime">Date Time</div><div class="value-cell pdf-row row-arrival-datetime" id="pvArrivalDateTime"></div>
+                <div class="label-cell pdf-row row-arrival-flight">Flight Number</div><div class="value-cell pdf-row row-arrival-flight" id="pvArrivalFlight"></div>
+              </div>
+            </section>
+
+            <section class="voucher-section hidden" id="returnSection">
+              <h4 class="voucher-section-title">Return</h4>
+              <div class="info-table">
+                <div class="label-cell pdf-row row-return-route">Route</div><div class="value-cell pdf-row row-return-route" id="pvReturnRoute"></div>
+                <div class="label-cell pdf-row row-return-datetime">Date Time</div><div class="value-cell pdf-row row-return-datetime" id="pvReturnDateTime"></div>
+                <div class="label-cell pdf-row row-return-flight">Flight Number</div><div class="value-cell pdf-row row-return-flight" id="pvReturnFlight"></div>
+              </div>
+            </section>
+
+            <section class="voucher-section full" id="passengerSection">
+              <h4 class="voucher-section-title">Passenger</h4>
+              <div class="info-table">
+                <div class="label-cell pdf-row row-name">Name</div><div class="value-cell pdf-row row-name" id="pvName"></div>
+                <div class="label-cell pdf-row row-phone">Phone</div><div class="value-cell pdf-row row-phone" id="pvPhone"></div>
+                <div class="label-cell pdf-row row-note">Note</div><div class="value-cell pdf-row row-note" id="pvNote"></div>
+              </div>
+            </section>
+
+            <section class="voucher-section full">
+              <h4 class="voucher-section-title">Service Notes (For airport arrivals only)</h4>
+              <ul class="service-notes">
+                <li>Driver will meet you at the airport arrival gate with a name sign.</li>
+                <li>Free waiting time included for flight delays.</li>
+                <li>After landing please turn on your phone.</li>
+                <li>If you have no internet, ask someone at the airport for help and contact us via the phone number on this voucher.</li>
+                <li><strong>EN:</strong> If you cannot find your driver, please stay at the meeting point and contact us immediately — do not leave with another vehicle before speaking to us.</li>
+                <li><strong>TR:</strong> Şoförünüzü bulamazsanız lütfen buluşma noktasında bekleyin ve hemen bizimle iletişime geçin — bizimle konuşmadan başka bir araçla ayrılmayınız.</li>
+                <li><strong>DE:</strong> Falls Sie Ihren Fahrer nicht finden können, bleiben Sie bitte am Treffpunkt und kontaktieren Sie uns sofort — verlassen Sie den Ort nicht mit einem anderen Fahrzeug, bevor Sie mit uns gesprochen haben.</li>
+                <li><strong>Driver Operation</strong> (day of travel) — WhatsApp / Phone: +90 506 056 18 94</li>
+              </ul>
+            </section>
+
+            <section class="voucher-section full policy-notice">
+              <h4 class="voucher-section-title">Cancellation &amp; No-Show Policy</h4>
+              <p style="margin:0 0 8px; padding-bottom:8px; border-bottom:1px solid #dbc0a7; color:#392e26; line-height:1.5; font-size:11px;">
+                <strong>EN:</strong> One day before your transfer, we will send you a reminder message and ask you to
+                confirm your reservation. You are free to cancel at no charge at that stage. However, once your
+                reservation is confirmed and a vehicle and driver have been arranged for you, cancellations or
+                no-shows are treated as follows: if you do not arrive at the confirmed meeting point, leave with
+                another vehicle without sharing a photo or live location with us first, or cancel at short notice
+                after the vehicle has been arranged, the booking will be treated as a no-show and the transfer fee
+                becomes non-refundable / payable in full.
+              </p>
+              <p style="margin:0 0 8px; padding-bottom:8px; border-bottom:1px solid #dbc0a7; color:#392e26; line-height:1.5; font-size:11px;">
+                <strong>TR:</strong> Transferinizden bir gün önce size bir hatırlatma mesajı gönderilir ve rezervasyonunuzu
+                onaylamanız istenir. Bu aşamada ücretsiz olarak iptal edebilirsiniz. Ancak rezervasyonunuz onaylandıktan
+                ve sizin için araç/şoför ayarlandıktan sonra iptal veya gelmeme (no-show) durumunda şu kurallar
+                geçerlidir: onaylanan buluşma noktasına gelmemeniz, bizimle fotoğraf veya canlı konum paylaşmadan
+                başka bir araçla ayrılmanız ya da araç ayarlandıktan sonra son anda iptal etmeniz halinde rezervasyon
+                "no-show" olarak değerlendirilir ve transfer ücreti iade edilmez / tam olarak tahsil edilir.
+              </p>
+              <p style="margin:0; color:#392e26; line-height:1.5; font-size:11px;">
+                <strong>DE:</strong> Einen Tag vor Ihrem Transfer senden wir Ihnen eine Erinnerung und bitten Sie,
+                Ihre Reservierung zu bestätigen. Zu diesem Zeitpunkt können Sie kostenlos stornieren. Sobald Ihre
+                Reservierung jedoch bestätigt ist und Fahrzeug sowie Fahrer für Sie eingeplant wurden, gilt bei
+                Stornierung oder Nichterscheinen Folgendes: Erscheinen Sie nicht am bestätigten Treffpunkt, verlassen
+                Sie den Ort mit einem anderen Fahrzeug, ohne zuvor ein Foto oder Ihren Live-Standort mit uns zu teilen,
+                oder stornieren Sie kurzfristig, nachdem das Fahrzeug bereits eingeplant wurde, wird die Buchung als
+                Nichterscheinen (No-Show) gewertet und der Transferpreis wird nicht erstattet / in voller Höhe berechnet.
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Text Tab -->
+    <section id="textTab" class="tab-panel">
+      <div class="card">
+        <div class="section-title" style="margin-top:0;">Info / Rezervasyon Metni</div>
+        <textarea id="reservationText" class="text-output" readonly></textarea>
+        <div class="output-actions">
+          <button type="button" class="btn-secondary" id="copyInfoTextBtn">Info Metnini Kopyala</button>
+        </div>
+        <div id="copyStatus" class="status-line">Bu metin info grubuna yapıştırmaya hazır.</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title" style="margin-top:0;">Hatırlatma Grubu Metni</div>
+        <textarea id="reminderGroupText" class="text-output" readonly></textarea>
+        <div class="output-actions">
+          <button type="button" class="btn-secondary" id="copyReminderGroupBtn">Hatırlatma Metnini Kopyala</button>
+        </div>
+        <div id="reminderCopyStatus" class="status-line">Bu metin ilk hatırlatma grubuna yapıştırmaya hazır.</div>
+      </div>
+    </section>
+
+    <!-- Bugün Alınanlar Tab (eskiden Günlük Kontrol - artık transfer tarihine göre değil, KAYIT ALINMA anına göre listeler) -->
+    <section id="controlTab" class="tab-panel">
+      <div class="card">
+        <div class="toolbar">
+          <button type="button" class="btn-primary" id="loadSheetBtn">Verileri Yükle</button>
+          <button type="button" class="btn-secondary" id="copyDailySummaryBtn">Bugünkü Özeti Kopyala</button>
+          <span class="pill pill-orange">Bu liste, rezervasyonun SİSTEME kaydedildiği ana göre filtrelenir (transfer tarihine göre değil)</span>
+        </div>
+        <div id="sheetStatus" class="status-line">Hazır.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Alınma Saati</th><th>Ad Soyad</th><th>Telefon</th>
+                <th>Transfer Tarihi</th><th>Transfer Saati</th>
+                <th>From</th><th>To</th><th>Araç</th><th>Fiyat</th><th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="dailyTableBody"><tr><td colspan="10" class="empty">Henüz veri yüklenmedi.</td></tr></tbody>
+          </table>
+        </div>
+        <div id="dailyMobileCards" class="mobile-cards"></div>
+        <textarea id="dailySummary" class="summary-output" readonly></textarea>
+      </div>
+    </section>
+
+    <!-- Tüm Rezervasyonlar Tab -->
+    <section id="allTab" class="tab-panel">
+      <div class="card">
+        <div class="toolbar">
+          <button type="button" class="btn-primary" id="loadAllBtn">Tümünü Yükle</button>
+          <button type="button" class="btn-secondary" id="copyListSummaryBtn">Liste Özetini Kopyala</button>
+          <input id="reservationSearch" class="search" type="text" placeholder="İsim, telefon, otel, rota, araç ara...">
+          <button type="button" class="btn-secondary filter-btn active" data-filter="all">Tümü</button>
+          <button type="button" class="btn-secondary filter-btn" data-filter="today">Bugün</button>
+          <button type="button" class="btn-secondary filter-btn" data-filter="tomorrow">Yarın</button>
+          <button type="button" class="btn-secondary filter-btn" data-filter="week">7 Gün</button>
+          <button type="button" class="btn-secondary filter-btn" data-filter="month">Bu Ay</button>
+        </div>
+        <div class="toolbar">
+          <div class="field" style="margin-bottom:0; flex:1 1 160px;">
+            <label for="rangeStart">Tarih Aralığı - Başlangıç</label>
+            <input id="rangeStart" type="date">
+          </div>
+          <div class="field" style="margin-bottom:0; flex:1 1 160px;">
+            <label for="rangeEnd">Bitiş</label>
+            <input id="rangeEnd" type="date">
+          </div>
+          <button type="button" class="btn-secondary" id="clearRangeBtn" style="align-self:flex-end;">Aralığı Temizle</button>
+        </div>
+
+        <div id="allStatus" class="status-line">Tüm rezervasyonları görmek için yükle.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarih</th><th>Saat</th><th>Ad Soyad</th><th>Telefon</th>
+                <th>From</th><th>To</th><th>Araç</th><th>Fiyat</th>
+                <th>Dönüş Tarihi</th><th>Dönüş Saati</th><th>Dönüş From</th><th>Dönüş To</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="allTableBody"><tr><td colspan="13" class="empty">Henüz veri yüklenmedi.</td></tr></tbody>
+          </table>
+        </div>
+        <div id="allMobileCards" class="mobile-cards"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  // ─── Konfigürasyon ──────────────────────────────────────────────────────────
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdfj1IQJQjWbWrrRZ5uVUnMjGJhC8Qyczk9DkRYfWi1xI8OGo9KJR41NFjTN0xFgxCfQ/exec';
+  const FIXED_BRAND     = 'ISTANBUL PREMIUM VIP TRANSFER';
+
+  // UYARI: Bu kontrol sadece arayüz kilididir; Sheets API erişimini korumaz.
+  // Şifre kaynak kodda düz metin tutulmaz. Girilen değer PBKDF2-SHA256 ile
+  // türetilir ve yalnızca aşağıdaki doğrulama değeriyle karşılaştırılır.
+  const AUTH_SALT       = 'tvs-admin-v1-9f3c7a2e';
+  const AUTH_ITERATIONS = 210000;
+  const AUTH_VERIFIER   = 'fcd8276c23abd692930a104dca7ff41f847f7497997f279e947ec50928cc34eb';
+  const AUTH_SESSION_KEY = 'istanbul-transfer-panel-auth-v1';
+
+  // ─── DOM referansları ───────────────────────────────────────────────────────
+  const $  = id => document.getElementById(id);
+  const loginGate          = $('loginGate');
+  const loginForm          = $('loginForm');
+  const loginPassword      = $('loginPassword');
+  const loginButton        = $('loginButton');
+  const loginError         = $('loginError');
+  const lockAppBtn         = $('lockAppBtn');
+  const form               = $('voucherForm');
+  const hasReturn          = $('hasReturn');
+  const returnFields       = $('returnFields');
+  const returnSection      = $('returnSection');
+  const voucher            = $('voucher');
+  const saveSheetBtn       = $('saveSheetBtn');
+  const newReservationBtn  = $('newReservationBtn');
+  const downloadPdfBtn     = $('downloadPdfBtn');
+  const copyTextBtn        = $('copyTextBtn');
+  const loadSheetBtn       = $('loadSheetBtn');
+  const loadAllBtn         = $('loadAllBtn');
+  const copyDailySummaryBtn= $('copyDailySummaryBtn');
+  const copyListSummaryBtn = $('copyListSummaryBtn');
+  const reservationText    = $('reservationText');
+  const reminderGroupText  = $('reminderGroupText');
+  const copyInfoTextBtn    = $('copyInfoTextBtn');
+  const copyReminderGroupBtn = $('copyReminderGroupBtn');
+  const reminderCopyStatus = $('reminderCopyStatus');
+  const copyStatus         = $('copyStatus');
+  const sheetStatus        = $('sheetStatus');
+  const allStatus          = $('allStatus');
+  const dailyTableBody     = $('dailyTableBody');
+  const allTableBody       = $('allTableBody');
+  const dailyMobileCards   = $('dailyMobileCards');
+  const allMobileCards     = $('allMobileCards');
+  const dailySummary       = $('dailySummary');
+  const sheetPostForm      = $('sheetPostForm');
+  const missingInfoBox     = $('missingInfoBox');
+  const okInfoBox          = $('okInfoBox');
+  const editBanner         = $('editBanner');
+  const reservationSearch  = $('reservationSearch');
+  const rangeStart         = $('rangeStart');
+  const rangeEnd           = $('rangeEnd');
+  const clearRangeBtn      = $('clearRangeBtn');
+  const dashGreeting       = $('dashGreeting');
+  const dashDate           = $('dashDate');
+  const dashboardStatus    = $('dashboardStatus');
+  const refreshDashboardBtn= $('refreshDashboardBtn');
+  const statToday          = $('statToday');
+  const statTomorrow       = $('statTomorrow');
+  const statWeek           = $('statWeek');
+  const statTodayCard      = $('statTodayCard');
+  const statTomorrowCard   = $('statTomorrowCard');
+  const statRevenueCard    = $('statRevenueCard');
+  const toggleRevenueBtn   = $('toggleRevenueBtn');
+  const revenueToggleLabel = $('revenueToggleLabel');
+  const statMonthRevenue   = $('statMonthRevenue');
+  const revMonthLabel      = $('revMonthLabel');
+  const revMonthSub        = $('revMonthSub');
+  const revMonthPrev       = $('revMonthPrev');
+  const revMonthNext       = $('revMonthNext');
+  const todayTransfersBody      = $('todayTransfersBody');
+  const todayTransfersMobile    = $('todayTransfersMobile');
+  const todayJobsLabel          = $('todayJobsLabel');
+  const tomorrowTransfersBody   = $('tomorrowTransfersBody');
+  const tomorrowTransfersMobile = $('tomorrowTransfersMobile');
+  const tomorrowJobsSummary     = $('tomorrowJobsSummary');
+  const tomorrowJobsStatus      = $('tomorrowJobsStatus');
+  const copyTomorrowJobsBtn     = $('copyTomorrowJobsBtn');
+  const showTodayJobsBtn        = $('showTodayJobsBtn');
+  const showTomorrowJobsBtn     = $('showTomorrowJobsBtn');
+  const todayJobsView           = $('todayJobsView');
+  const tomorrowJobsView        = $('tomorrowJobsView');
+  const todayJobsSwitchCount    = $('todayJobsSwitchCount');
+  const tomorrowJobsSwitchCount = $('tomorrowJobsSwitchCount');
+  const jobsOrderNote            = $('jobsOrderNote');
+
+  // ─── State ─────────────────────────────────────────────────────────────────
+  let bookingNumber      = generateBookingNumber();
+  let editingBookingNo   = '';
+  let sheetRows          = [];
+  let activeFilter       = 'all';
+  let revenueRevealed    = false;
+  // YENİ: Bu formda daha önce başarıyla kaydedilmiş (yeni) booking no'yu takip eder.
+  // Amaç: aynı kaydı ikinci kez (küçük bir değişiklikle) kaydederken sistemin bunu
+  // "başkasıyla çakışma" sanıp booking no'yu değiştirmesini engellemek — aksi halde
+  // ikinci Kaydet, güncelleme yerine yepyeni bir satır oluşturuyordu.
+  let savedOnceBookingNo = '';
+  let dashboardJobsDay   = 'today';
+  let applicationStarted = false;
+
+  // ─── Giriş koruması ───────────────────────────────────────────────────────
+  function bytesToHex(bytes) {
+    return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function derivePasswordVerifier(password) {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']
+    );
+    const bits = await crypto.subtle.deriveBits({
+      name: 'PBKDF2',
+      salt: encoder.encode(AUTH_SALT),
+      iterations: AUTH_ITERATIONS,
+      hash: 'SHA-256'
+    }, key, 256);
+    return bytesToHex(new Uint8Array(bits));
+  }
+
+  function constantTimeEqual(a, b) {
+    if (a.length !== b.length) return false;
+    let difference = 0;
+    for (let i = 0; i < a.length; i++) difference |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return difference === 0;
+  }
+
+  function startApplication() {
+    if (applicationStarted) return;
+    applicationStarted = true;
+    updatePreview();
+    setDashGreeting();
+    setRevenueVisibility(false);
+    loadRows();
+  }
+
+  function unlockApplication() {
+    document.body.classList.remove('auth-locked');
+    loginGate.hidden = true;
+    document.querySelector('.app').removeAttribute('inert');
+    sessionStorage.setItem(AUTH_SESSION_KEY, 'ok');
+    loginPassword.value = '';
+    loginError.textContent = '';
+    startApplication();
+  }
+
+  function lockApplication() {
+    sessionStorage.removeItem(AUTH_SESSION_KEY);
+    document.body.classList.add('auth-locked');
+    document.querySelector('.app').setAttribute('inert', '');
+    loginGate.hidden = false;
+    loginPassword.value = '';
+    loginError.textContent = '';
+    requestAnimationFrame(() => loginPassword.focus());
+  }
+
+  loginForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    loginButton.disabled = true;
+    loginButton.textContent = 'Kontrol ediliyor...';
+    loginError.textContent = '';
+
+    try {
+      const verifier = await derivePasswordVerifier(loginPassword.value);
+      if (constantTimeEqual(verifier, AUTH_VERIFIER)) {
+        unlockApplication();
+      } else {
+        loginPassword.value = '';
+        loginError.textContent = 'Şifre hatalı. Lütfen tekrar deneyin.';
+        loginPassword.focus();
+      }
+    } catch (error) {
+      loginError.textContent = 'Bu tarayıcı güvenli şifre doğrulamasını desteklemiyor.';
+    } finally {
+      loginButton.disabled = false;
+      loginButton.textContent = 'Giriş Yap';
+    }
+  });
+
+  lockAppBtn.addEventListener('click', lockApplication);
+
+  // ─── Util ──────────────────────────────────────────────────────────────────
+  function generateBookingNumber() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  function pad(v) { return String(v).padStart(2, '0'); }
+
+  function toDate(v) {
+    if (!v) return null;
+    // Apps Script "yyyy-MM-dd HH:mm:ss" formatını tüm tarayıcılarda güvenilir okumak için
+    // (Safari boşluklu formatı bazen yanlış yorumluyor, ISO 'T' ayracına çeviriyoruz)
+    if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/.test(v)) {
+      v = v.replace(' ', 'T');
+    }
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function formatDate(v) {
+    if (!v) return '';
+    const d = toDate(v + 'T00:00:00') || toDate(v);
+    return d ? `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}` : '';
+  }
+
+  function formatDateTime(v) {
+    const d = toDate(v);
+    return d ? `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()} / ${pad(d.getHours())}:${pad(d.getMinutes())}` : '';
+  }
+
+  function formatDateTimeDots(v) {
+    const d = toDate(v);
+    return d ? `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} / ${pad(d.getHours())}:${pad(d.getMinutes())}` : '';
+  }
+
+  function isoDate(v) {
+    const d = toDate(v);
+    return d ? `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}` : '';
+  }
+
+  function getTime(v) {
+    const d = toDate(v);
+    return d ? `${pad(d.getHours())}:${pad(d.getMinutes())}` : '';
+  }
+
+  function dateTimeFromRow(date, time) {
+    return date ? `${date}T${time || '00:00'}` : '';
+  }
+
+  function getCheckedService() {
+    return new FormData(form).get('serviceType') || 'Transfer';
+  }
+
+  function setService(v) {
+    document.querySelectorAll('input[name="serviceType"]').forEach(i => {
+      i.checked = i.value === (v || 'Transfer');
+    });
+  }
+
+  function val(id)       { return ($(id).value || '').trim(); }
+  function setVal(id, v) { $(id).value = v || ''; }
+
+  function getData() {
+    return {
+      bookingNo     : editingBookingNo || bookingNumber,
+      brand         : FIXED_BRAND,
+      serviceType   : getCheckedService(),
+      hasReturn     : hasReturn.checked,
+      flyCode       : val('flyCode'),
+      bookingDate   : val('bookingDate'),
+      nameSurname   : val('nameSurname'),
+      phone         : val('phone'),
+      passengerCount: val('passengerCount'),
+      vehicle       : val('vehicle'),
+      pickup        : val('pickup'),
+      dropoff       : val('dropoff'),
+      dateTime      : val('dateTime'),
+      amount        : val('amount'),
+      currency      : val('currency') || 'EUR',
+      paymentMethod : val('paymentMethod'),
+      note          : val('note'),
+      returnFlyCode : val('returnFlyCode'),
+      returnPickup  : val('returnPickup'),
+      returnDropoff : val('returnDropoff'),
+      returnDateTime: val('returnDateTime')
+    };
+  }
+
+  function priceText(data) {
+    return data.amount ? `${data.amount} ${data.currency}` : '';
+  }
+
+  function finalAmount(data) {
+    const price = priceText(data);
+    return price ? `${price}${data.paymentMethod ? ` / ${data.paymentMethod}` : ''}` : '';
+  }
+
+  function missing(data) {
+    const items = [];
+    if (!data.dateTime)      items.push('Tarih saat eksik');
+    if (!data.nameSurname)   items.push('Ad soyad eksik');
+    if (!data.pickup)        items.push('From eksik');
+    if (!data.dropoff)       items.push('To eksik');
+    if (!data.passengerCount)items.push('Kişi sayısı eksik');
+    if (!data.vehicle)       items.push('Araç eksik');
+    if (!data.amount)        items.push('Fiyat eksik');
+    return items;
+  }
+
+  // YENİ: Bunlar olmadan KAYIT ASLA ALINAMAZ (sadece uyarı değil, engelleme).
+  function requiredMissing(data) {
+    const items = [];
+    if (!data.nameSurname) items.push('Ad Soyad');
+    if (!data.phone)       items.push('Telefon');
+    if (!data.pickup)      items.push('From (Alış noktası)');
+    if (!data.dropoff)     items.push('To (Bırakış noktası)');
+    return items;
+  }
+
+  // YENİ: Aynı telefon + aynı tarih/saat + aynı from/to ile zaten bir kayıt varsa
+  // (mükerrer gönderim / yanlışlıkla iki kez kaydetme ihtimaline karşı).
+  // Sadece liste bir kez yüklenmişse kontrol edebiliriz — hiç yüklenmediyse (sheetRows boşsa)
+  // kontrol atlanır, kayıt engellenmez (veriye erişimimiz yoksa yanlış engelleme yapmayalım).
+  function findDuplicateContent(data) {
+    if (!sheetRows.length) return null;
+    return sheetRows.find(row => {
+      // DÜZELTME: sadece 'düzenleme modu'nu değil, mevcut aktif booking no'yu (yeni kaydın
+      // tekrar kaydedilme durumunu da) hariç tutuyoruz — kendi kaydımızı mükerrer sanmasın.
+      if (String(row['Booking No']) === String(data.bookingNo)) return false;
+      const sameDate = dateTimeFromRow(row.Date, row.Time) === data.dateTime;
+      const samePhone = (row.Phone || '').replace(/\s+/g,'') === (data.phone || '').replace(/\s+/g,'');
+      const sameFrom = (row.From || '').trim().toLowerCase() === data.pickup.trim().toLowerCase();
+      const sameTo   = (row.To   || '').trim().toLowerCase() === data.dropoff.trim().toLowerCase();
+      return sameDate && samePhone && sameFrom && sameTo && data.dateTime;
+    }) || null;
+  }
+
+  // YENİ: Yeni kayıtta booking numarası tesadüfen zaten var olan BAŞKA bir kayıtla çakışırsa
+  // otomatik olarak yeni bir numara üretilir. Kendi az önce kaydettiğimiz kayda DOKUNMAZ.
+  function avoidBookingNoCollision() {
+    if (editingBookingNo) return;                      // güncellemede dokunma
+    if (bookingNumber === savedOnceBookingNo) return;   // bu zaten BİZİM kaydımız, çakışma değil
+    let guard = 0;
+    while (sheetRows.some(row => String(row['Booking No']) === String(bookingNumber)) && guard < 20) {
+      bookingNumber = generateBookingNumber();
+      guard++;
+    }
+  }
+
+  let isSaving = false; // YENİ: çift tıklama / çift gönderim kilidi
+
+  function setPdfRow(rowClass, id, value) {
+    const has = !!value;
+    document.querySelectorAll(`.${rowClass}`).forEach(el => el.classList.toggle('hidden', !has));
+    if (id) $(id).textContent = value || '';
+  }
+
+  // ─── Rezervasyon metni ──────────────────────────────────────────────────────
+  function reservationTxt(data) {
+    const line = `${formatDateTimeDots(data.dateTime) || '(tarih belirtilmedi)'} / ${data.flyCode || '-'}`;
+
+    let returnLine = '';
+    if (data.hasReturn) {
+      const rm = `Return: ${formatDateTimeDots(data.returnDateTime) || '(belirtilmedi)'}${data.returnFlyCode ? ` / ${data.returnFlyCode}` : ''}`;
+      const rf = data.returnPickup  ? `\nReturn From: ${data.returnPickup}`  : '';
+      const rt = data.returnDropoff ? `\nReturn To: ${data.returnDropoff}`   : '';
+      returnLine = `\n${rm}${rf}${rt}\n`;
+    }
+
+    return `${line}
+
+${data.nameSurname || '(isim belirtilmedi)'}
+
+${data.phone || '(telefon belirtilmedi)'}
+
+From: ${data.pickup || '(belirtilmedi)'}
+To: ${data.dropoff || '(belirtilmedi)'}
+
+Person: ${data.passengerCount || '(belirtilmedi)'}
+
+Note: ${data.note || '(belirtilmedi)'}
+
+Price: ${priceText(data) || '(belirtilmedi)'}
+
+Car: ${data.vehicle || '(belirtilmedi)'}
+${returnLine}
+${FIXED_BRAND}`.trim();
+  }
+
+  // İlk hatırlatma grubuna atılacak daha kısa operasyon özeti.
+  // Bu çıktı yalnızca tarayıcıda üretilir; Sheets kayıt yapısına dokunmaz.
+  function reminderGroupTxt(data) {
+    const main = `${formatDateTimeDots(data.dateTime) || '(tarih belirtilmedi)'} / ${data.flyCode || '-'}`;
+    const parts = [
+      'HATIRLATMA',
+      '',
+      main,
+      '',
+      data.nameSurname || '(isim belirtilmedi)',
+      data.phone || '(telefon belirtilmedi)',
+      '',
+      `From: ${data.pickup || '(belirtilmedi)'}`,
+      `To: ${data.dropoff || '(belirtilmedi)'}`,
+      `Person: ${data.passengerCount || '(belirtilmedi)'}`,
+      `Car: ${data.vehicle || '(belirtilmedi)'}`
+    ];
+
+    if (data.hasReturn) {
+      parts.push(
+        '',
+        `DÖNÜŞ: ${formatDateTimeDots(data.returnDateTime) || '(belirtilmedi)'}${data.returnFlyCode ? ` / ${data.returnFlyCode}` : ''}`,
+        `Return From: ${data.returnPickup || '(belirtilmedi)'}`,
+        `Return To: ${data.returnDropoff || '(belirtilmedi)'}`
+      );
+    }
+
+    parts.push('', FIXED_BRAND);
+    return parts.join('\n').trim();
+  }
+
+  // ─── Preview güncellemesi ───────────────────────────────────────────────────
+  function updatePreview() {
+    const data        = getData();
+    const arrivalRoute = [data.pickup, data.dropoff].filter(Boolean).join(' → ');
+    const returnRoute  = [data.returnPickup, data.returnDropoff].filter(Boolean).join(' → ');
+    const transferType = data.hasReturn ? 'Arrival + Return' : 'One Way';
+
+    setPdfRow('row-booking-no',      'pvBookingNo',      data.bookingNo);
+    setPdfRow('row-vehicle',         'pvVehicle',        data.vehicle);
+    setPdfRow('row-passengers',      'pvPassengerCount', data.passengerCount);
+    setPdfRow('row-service-type',    'pvServiceType',    data.serviceType);
+    setPdfRow('row-transfer-type',   'pvTransferType',   transferType);
+    setPdfRow('row-final-amount',    'pvFinalAmount',    finalAmount(data));
+    setPdfRow('row-booking-date',    'pvBookingDate',    formatDate(data.bookingDate));
+    setPdfRow('row-arrival-route',   'pvArrivalRoute',   arrivalRoute);
+    setPdfRow('row-arrival-datetime','pvArrivalDateTime',formatDateTime(data.dateTime));
+    setPdfRow('row-arrival-flight',  'pvArrivalFlight',  data.flyCode);
+    setPdfRow('row-return-route',    'pvReturnRoute',    returnRoute);
+    setPdfRow('row-return-datetime', 'pvReturnDateTime', formatDateTime(data.returnDateTime));
+    setPdfRow('row-return-flight',   'pvReturnFlight',   data.returnFlyCode);
+    setPdfRow('row-name',            'pvName',           data.nameSurname);
+    setPdfRow('row-phone',           'pvPhone',          data.phone);
+    setPdfRow('row-note',            'pvNote',           data.note);
+
+    returnFields.classList.toggle('hidden', !data.hasReturn);
+    returnSection.classList.toggle('hidden', !(data.hasReturn && (returnRoute || data.returnDateTime || data.returnFlyCode)));
+    $('arrivalSection').classList.toggle('hidden',   !(arrivalRoute || data.dateTime || data.flyCode));
+    $('passengerSection').classList.toggle('hidden', !(data.nameSurname || data.phone || data.note));
+
+    reservationText.value   = reservationTxt(data);
+    reminderGroupText.value = reminderGroupTxt(data);
+
+    const mis = missing(data);
+    if (mis.length) {
+      missingInfoBox.innerHTML = '<strong>Eksik / Kontrol:</strong><br>' + mis.map(m => '• ' + m).join('<br>');
+      missingInfoBox.classList.remove('hidden');
+      okInfoBox.classList.add('hidden');
+    } else {
+      missingInfoBox.classList.add('hidden');
+      okInfoBox.classList.remove('hidden');
+    }
+
+    if (editingBookingNo) {
+      editBanner.innerHTML = `Düzenleme modu: <strong>${editingBookingNo}</strong> numaralı rezervasyon güncellenecek.`;
+      editBanner.classList.remove('hidden');
+      saveSheetBtn.textContent = 'Güncelle';
+    } else {
+      editBanner.classList.add('hidden');
+      saveSheetBtn.textContent = 'Kaydet';
+    }
+  }
+
+  // ─── PDF indir ──────────────────────────────────────────────────────────────
+  async function downloadPdf() {
+    updatePreview();
+    const data = getData();
+    const d    = toDate(data.dateTime);
+    const name = (data.nameSurname || 'Passenger')
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_\-ğüşöçıİĞÜŞÖÇ]/g, '');
+    const fileName = `${name}_${d ? `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}_${pad(d.getHours())}-${pad(d.getMinutes())}` : 'NoDate'}.pdf`;
+
+    await html2pdf().set({
+      margin    : [0,0,0,0],
+      filename  : fileName,
+      image     : { type: 'jpeg', quality: .98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0, backgroundColor: '#fff' },
+      jsPDF     : { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak : { mode: ['avoid-all','css','legacy'] }
+    }).from(voucher).save();
+  }
+
+  // ─── Metni kopyala ──────────────────────────────────────────────────────────
+  async function copyText() {
+    updatePreview();
+    await navigator.clipboard.writeText(reservationText.value);
+    copyStatus.textContent = 'Info metni kopyalandı.';
+    setTimeout(() => copyStatus.textContent = 'Bu metin info grubuna yapıştırmaya hazır.', 2200);
+  }
+
+  async function copyReminderGroupText() {
+    updatePreview();
+    await navigator.clipboard.writeText(reminderGroupText.value);
+    reminderCopyStatus.textContent = 'Hatırlatma metni kopyalandı.';
+    setTimeout(() => reminderCopyStatus.textContent = 'Bu metin ilk hatırlatma grubuna yapıştırmaya hazır.', 2200);
+  }
+
+  // ─── Sheets'e gönderilecek payload ─────────────────────────────────────────
+  function payload(data) {
+    return {
+      bookingNo        : data.bookingNo,
+      date             : isoDate(data.dateTime),
+      time             : getTime(data.dateTime),
+      passengerName    : data.nameSurname,
+      phone            : data.phone,             // Apps Script ' ekler
+      from             : data.pickup,
+      to               : data.dropoff,
+      person           : data.passengerCount,
+      car              : data.vehicle,
+      price            : data.amount,
+      currency         : data.amount ? data.currency : '',
+      flightCode       : data.flyCode,
+      returnDate       : isoDate(data.returnDateTime),
+      returnTime       : getTime(data.returnDateTime),
+      returnFrom       : data.returnPickup,
+      returnTo         : data.returnDropoff,
+      returnFlightCode : data.returnFlyCode,
+      note             : data.note,
+      serviceType      : data.serviceType,
+      transferType     : data.hasReturn ? 'Arrival + Return' : 'One Way'
+      // NOT: 'Created At' / 'Updated At' artık front-end'den gönderilmiyor —
+      // Apps Script bunları kendi sunucu saatiyle (now_()) otomatik yazıyor.
+    };
+  }
+
+  // ─── Kaydet / Güncelle ──────────────────────────────────────────────────────
+  // doPost form gönderimi ile çalışır. Güncelleme için Apps Script booking no kontrolü yapar.
+  function save() {
+    if (!APPS_SCRIPT_URL) { alert('İstanbul Google Sheets / Apps Script bağlantısı henüz ayarlanmadı. Kayıt yapılmadı.'); return; }
+    if (isSaving) return; // YENİ: çift tıklamayı tamamen yok say
+
+    updatePreview();
+
+    // YENİ: yeni kayıtta booking no çakışması varsa (çok düşük ihtimal) otomatik düzelt
+    avoidBookingNoCollision();
+
+    const data = getData();
+
+    // YENİ: Zorunlu alan kontrolü — bunlar boşsa kayıt/güncelleme hiç gönderilmez.
+    const req = requiredMissing(data);
+    if (req.length) {
+      missingInfoBox.innerHTML = '<strong>Kaydedilemedi — zorunlu alan(lar) eksik:</strong><br>' + req.map(m => '• ' + m).join('<br>');
+      missingInfoBox.classList.remove('hidden');
+      okInfoBox.classList.add('hidden');
+      const warnMsg = 'Kaydedilemedi: Ad Soyad / Telefon / From / To alanları boş olamaz.';
+      sheetStatus.textContent = warnMsg;
+      allStatus.textContent   = warnMsg;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // YENİ: Aynı telefon + aynı tarih/saat + aynı from/to ile mevcut bir kayıt var mı?
+    const dup = findDuplicateContent(data);
+    if (dup) {
+      const proceed = confirm(
+        `Dikkat: Aynı telefon / tarih-saat / güzergahla ${dup['Booking No']} numaralı bir rezervasyon zaten kayıtlı.\n\n` +
+        `Yine de yeni bir kayıt olarak eklemek istiyor musun?\n(İptal edersen kayıt gönderilmeyecek.)`
+      );
+      if (!proceed) {
+        sheetStatus.textContent = 'Kaydedilmedi (mükerrer kayıt uyarısı iptal edildi).';
+        allStatus.textContent   = sheetStatus.textContent;
+        return;
+      }
+    }
+
+    // YENİ: kilit devreye girsin, buton pasifleşsin
+    isSaving = true;
+    saveSheetBtn.disabled = true;
+    const originalBtnText = saveSheetBtn.textContent;
+    saveSheetBtn.textContent = editingBookingNo ? 'Güncelleniyor...' : 'Kaydediliyor...';
+
+    sheetPostForm.innerHTML = '';
+    sheetPostForm.action    = APPS_SCRIPT_URL;
+
+    Object.entries(payload(data)).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.type  = 'hidden';
+      input.name  = key;
+      input.value = value || '';
+      sheetPostForm.appendChild(input);
+    });
+
+    sheetPostForm.submit();
+
+    // YENİ: Bu yeni kaydı "bizim" olarak işaretle — form sıfırlanmadan tekrar
+    // Kaydet'e basılırsa (küçük bir düzeltme yapıp), bu artık çakışma sayılmayacak
+    // ve Apps Script tarafında aynı satır güncellenecek (yeni satır AÇILMAYACAK).
+    if (!editingBookingNo) {
+      savedOnceBookingNo = data.bookingNo;
+    }
+
+    const msg = editingBookingNo
+      ? `Güncellendi: ${data.bookingNo}`
+      : `Kaydedildi: ${data.bookingNo}`;
+    sheetStatus.textContent = msg;
+    allStatus.textContent   = msg + '. Listeyi yenileyebilirsin.';
+
+    // Kayıt sonrası listeyi tazele + kilidi çöz
+    setTimeout(() => {
+      loadRows();
+      isSaving = false;
+      saveSheetBtn.disabled = false;
+      saveSheetBtn.textContent = originalBtnText;
+    }, 1200);
+  }
+
+  // ─── Yeni kayıt ─────────────────────────────────────────────────────────────
+  function resetNew() {
+    form.reset();
+    editingBookingNo   = '';
+    bookingNumber      = generateBookingNumber();
+    savedOnceBookingNo = ''; // YENİ: bir önceki kaydın "bizim" işareti burada temizlenir
+    hasReturn.checked = false;
+    setService('Transfer');
+    setTimeout(updatePreview, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ─── Tab geçişi ─────────────────────────────────────────────────────────────
+  function activate(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === tab));
+  }
+
+  // ─── JSONP yardımcısı ───────────────────────────────────────────────────────
+  function jsonp(action, extraParams, onSuccess, onError) {
+    if (!APPS_SCRIPT_URL) { if (onError) onError('İstanbul Apps Script bağlantısı ayarlanmadı'); return; }
+    const cbName = `cb_${Date.now()}_${Math.floor(Math.random()*1000)}`;
+    const script = document.createElement('script');
+    const params = new URLSearchParams({ action, callback: cbName, ...extraParams });
+
+    // YENİ: Apps Script hiç cevap vermezse (ör. dağıtım ayarı bozuksa, Google girişi
+    // istiyorsa) eskiden sistem sonsuza kadar "yükleniyor" diye takılı kalıyordu.
+    // Artık 20 saniye içinde cevap gelmezse net bir zaman aşımı hatası gösteriliyor.
+    let settled = false;
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      delete window[cbName];
+      script.remove();
+      if (onError) onError('timeout');
+    }, 20000);
+
+    window[cbName] = res => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      onSuccess(res || {});
+      delete window[cbName];
+      script.remove();
+    };
+
+    script.onerror = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      if (onError) onError('network');
+      delete window[cbName];
+      script.remove();
+    };
+
+    script.src = `${APPS_SCRIPT_URL}?${params}`;
+    document.body.appendChild(script);
+  }
+
+  // ─── Veri yükle ─────────────────────────────────────────────────────────────
+  function loadRows() {
+    sheetStatus.textContent     = 'Veri yükleniyor...';
+    allStatus.textContent       = 'Veri yükleniyor...';
+    dashboardStatus.textContent = 'Veri yükleniyor...';
+
+    jsonp('list', {}, res => {
+      sheetRows = res.rows || [];
+      renderDaily();
+      renderAll();
+      renderDashboard();
+      sheetStatus.textContent     = `${sheetRows.length} rezervasyon yüklendi.`;
+      allStatus.textContent       = `${sheetRows.length} rezervasyon yüklendi.`;
+      dashboardStatus.textContent = `Son güncelleme: az önce (${sheetRows.length} kayıt).`;
+    }, (reason) => {
+      const errMsg = reason === 'timeout'
+        ? 'Zaman aşımı: Apps Script 20 saniyede cevap vermedi. Dağıtımın "Kimin erişimi var" ayarı "Herkes" olmalı (Google girişi istiyorsa JSONP hiç dönmez).'
+        : 'Veri yüklenemedi. Apps Script dağıtım linkini/ayarlarını kontrol et.';
+      sheetStatus.textContent     = errMsg;
+      allStatus.textContent       = errMsg;
+      dashboardStatus.textContent = errMsg;
+    });
+  }
+
+  // ─── SİL ────────────────────────────────────────────────────────────────────
+  // FIX: doGet action=delete ile JSONP üzerinden silme yapılıyor
+  function deleteReservation(bookingNo) {
+    if (!bookingNo || bookingNo === 'undefined' || bookingNo === 'null') {
+      allStatus.textContent = 'Silinemedi: bu kaydın Booking No bilgisi bulunamadı (Sheets tarafında kontrol edilmeli).';
+      return;
+    }
+    if (!confirm(`${bookingNo} numaralı rezervasyon silinsin mi?`)) return;
+
+    jsonp('delete', { bookingNo }, res => {
+      if (res.deleted) {
+        allStatus.textContent   = `${bookingNo} silindi.`;
+        sheetStatus.textContent = `${bookingNo} silindi.`;
+        if (editingBookingNo === bookingNo) resetNew();
+        loadRows();
+      } else {
+        allStatus.textContent = `Silinemedi: ${res.error || 'Kayıt bulunamadı'}`;
+      }
+    }, () => {
+      allStatus.textContent = 'Silme başarısız. Apps Script dağıtımını kontrol et.';
+    });
+  }
+
+  // ─── Tablo / kart render yardımcıları ──────────────────────────────────────
+  function rowDate(row) {
+    return row.Date ? toDate(`${row.Date}T${row.Time || '00:00'}`) : null;
+  }
+
+  function rowReturnDate(row) {
+    return row['Return Date'] ? toDate(`${row['Return Date']}T${row['Return Time'] || '00:00'}`) : null;
+  }
+
+  function dayKey(d) {
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  function rowMissing(row) {
+    return !row.Date || !row.Time || !row['Passenger Name'] || !row.From ||
+           !row.To   || !row.Person || !row.Car || !row.Price;
+  }
+
+  function hasReturnLeg(row) {
+    return !!(row['Return Date'] || row['Return Time'] || row['Return From'] || row['Return To']);
+  }
+
+  function mainJobLabel(row) {
+    const service = String(row['Service Type'] || 'Transfer').toLowerCase();
+    if (service === 'tour') return 'TUR';
+    if (service === 'exit') return 'ÇIKIŞ';
+    return 'GİDİŞ';
+  }
+
+  // Bir rezervasyonu veri tabanında çoğaltmadan, yalnızca ekranda operasyon işlerine ayırır.
+  // Aynı rezervasyonun gidiş ve dönüşü aynı gündeyse tek operasyon işi olarak gösterilir.
+  // Fiyat ve ciro rezervasyon satırında tek kalır; hiçbir yeni Sheets kaydı oluşturulmaz.
+  function buildTransferJobs(rows) {
+    const jobs = [];
+
+    rows.forEach(row => {
+      const mainDate   = rowDate(row);
+      const returnDate = rowReturnDate(row);
+
+      const mainLeg = mainDate ? {
+        type: 'main',
+        label: mainJobLabel(row),
+        shortLabel: mainJobLabel(row) === 'GİDİŞ' ? 'G' : mainJobLabel(row),
+        dateTime: mainDate,
+        date: row.Date || '',
+        time: row.Time || '',
+        from: row.From || '',
+        to: row.To || '',
+        flightCode: row['Flight Code'] || ''
+      } : null;
+
+      const returnLeg = returnDate ? {
+        type: 'return',
+        label: 'DÖNÜŞ',
+        shortLabel: 'D',
+        dateTime: returnDate,
+        date: row['Return Date'] || '',
+        time: row['Return Time'] || '',
+        from: row['Return From'] || '',
+        to: row['Return To'] || '',
+        flightCode: row['Return Flight Code'] || ''
+      } : null;
+
+      // Aynı gün içindeki gidiş + dönüş tek iştir; iki ayrı satır ve iki ayrı sayaç oluşturmaz.
+      if (mainLeg && returnLeg && dayKey(mainDate) === dayKey(returnDate)) {
+        const legs = [mainLeg, returnLeg].sort((a, b) => a.dateTime - b.dateTime);
+        jobs.push({
+          type: 'roundtrip',
+          typeLabel: `${mainLeg.label} + DÖNÜŞ`,
+          dateTime: legs[0].dateTime,
+          date: mainLeg.date,
+          time: `${mainLeg.time || '-'} / ${returnLeg.time || '-'}`,
+          from: mainLeg.from,
+          to: mainLeg.to,
+          flightCode: mainLeg.flightCode,
+          legs,
+          row
+        });
+        return;
+      }
+
+      if (mainLeg) {
+        jobs.push({
+          type: 'main',
+          typeLabel: mainLeg.label,
+          dateTime: mainLeg.dateTime,
+          date: mainLeg.date,
+          time: mainLeg.time,
+          from: mainLeg.from,
+          to: mainLeg.to,
+          flightCode: mainLeg.flightCode,
+          legs: [mainLeg],
+          row
+        });
+      }
+
+      if (returnLeg) {
+        jobs.push({
+          type: 'return',
+          typeLabel: returnLeg.label,
+          dateTime: returnLeg.dateTime,
+          date: returnLeg.date,
+          time: returnLeg.time,
+          from: returnLeg.from,
+          to: returnLeg.to,
+          flightCode: returnLeg.flightCode,
+          legs: [returnLeg],
+          row
+        });
+      }
+    });
+
+    return jobs.sort((a, b) => a.dateTime - b.dateTime);
+  }
+
+  function jobPriceHtml(job) {
+    const row = job.row;
+    const price = row.Price ? `${row.Price} ${row.Currency || ''}` : '-';
+    const note = hasReturnLeg(row) ? 'gidiş + dönüş toplamı' : 'rezervasyon toplamı';
+    return `<span class="total-price-label">${price}</span><span class="total-price-note">${note}</span>`;
+  }
+
+  function jobBadgeHtml(job) {
+    const badgeClass = job.type === 'return' ? ' return' : (job.type === 'roundtrip' ? ' roundtrip' : '');
+    return `<span class="job-badge${badgeClass}">${job.typeLabel}</span>`;
+  }
+
+  function jobTimeHtml(job) {
+    if (job.type !== 'roundtrip') return job.time || '-';
+    return `<div class="job-leg-stack">${job.legs.map(leg =>
+      `<div class="job-leg-line"><span class="job-leg-key${leg.type === 'return' ? ' return' : ''}">${leg.shortLabel}</span><strong>${leg.time || '-'}</strong></div>`
+    ).join('')}</div>`;
+  }
+
+  function jobRoutePartHtml(job, field) {
+    if (job.type !== 'roundtrip') return job[field] || '-';
+    return `<div class="job-leg-stack">${job.legs.map(leg =>
+      `<div class="job-leg-line"><span class="job-leg-key${leg.type === 'return' ? ' return' : ''}">${leg.shortLabel}</span><span>${leg[field] || '-'}</span></div>`
+    ).join('')}</div>`;
+  }
+
+  // Uçuş kodu varsa gösterilir; yoksa boş bırakmak yerine net biçimde "-" görünür.
+  // Aynı gün gidiş + dönüş işinde iki ayağın uçuş kodu G / D olarak ayrı gösterilir.
+  function jobFlightHtml(job) {
+    if (job.type !== 'roundtrip') {
+      return job.flightCode
+        ? `<span class="flight-code-chip">${job.flightCode}</span>`
+        : '<span class="flight-empty">-</span>';
+    }
+
+    return `<div class="job-leg-stack">${job.legs.map(leg =>
+      `<div class="job-leg-line"><span class="job-leg-key${leg.type === 'return' ? ' return' : ''}">${leg.shortLabel}</span>${leg.flightCode ? `<span class="flight-code-chip">${leg.flightCode}</span>` : '<span class="flight-empty">-</span>'}</div>`
+    ).join('')}</div>`;
+  }
+
+  function jobNextOperationDate(job, now) {
+    const futureLeg = (job.legs || [])
+      .map(leg => leg.dateTime)
+      .filter(date => date && date > now)
+      .sort((a, b) => a - b)[0];
+    return futureLeg || job.dateTime;
+  }
+
+  function jobsForDay(jobs, key) {
+    return jobs.filter(job => dayKey(job.dateTime) === key);
+  }
+
+  function buildJobsSummary(jobs, title) {
+    if (!jobs.length) return `${title}: iş bulunamadı.`;
+
+    return `${title.toLocaleUpperCase('tr-TR')} — ${jobs.length} İŞ\n\n` + jobs.map(job => {
+      const row = job.row;
+
+      if (job.type === 'roundtrip') {
+        const legLines = job.legs.map(leg => {
+          const flight = leg.flightCode ? ` / Uçuş: ${leg.flightCode}` : '';
+          return `${leg.time || '-'} — ${leg.label}\n${leg.from || '-'} → ${leg.to || '-'}${flight}`;
+        }).join('\n');
+
+        return `GİDİŞ + DÖNÜŞ\n${row['Passenger Name'] || '-'}\n${row.Phone || '-'}\n${legLines}\n${row.Person || '-'} kişi / ${row.Car || '-'}\nRezervasyon No: ${row['Booking No'] || '-'}`;
+      }
+
+      const flight = job.flightCode ? `\nUçuş: ${job.flightCode}` : '';
+      return `${job.time || '-'} — ${job.typeLabel}\n${row['Passenger Name'] || '-'}\n${row.Phone || '-'}\n${job.from || '-'} → ${job.to || '-'}${flight}\n${row.Person || '-'} kişi / ${row.Car || '-'}\nRezervasyon No: ${row['Booking No'] || '-'}`;
+    }).join('\n\n');
+  }
+
+  // Bugün Alınanlar tablosu — transfer tarihine göre değil, kaydın SİSTEME düştüğü ana göre
+  function renderDailyTable(rows, body) {
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="10" class="empty">Bugün için henüz alınmış rezervasyon yok (veya \'Created At\' verisi henüz Sheets\'te tutulmuyor).</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(row => `
+      <tr>
+        <td>${createdTimeLabel(row)}</td>
+        <td>${row['Passenger Name'] || '-'}</td>
+        <td>${row.Phone || '-'}</td>
+        <td>${row.Date || '-'}</td>
+        <td>${row.Time || '-'}</td>
+        <td>${row.From || '-'}</td>
+        <td>${row.To   || '-'}</td>
+        <td>${row.Car  || '-'}</td>
+        <td>${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</td>
+        <td><div class="row-actions">
+          <button class="btn-secondary mini-btn" onclick="copyRowText('${esc(row['Booking No'])}')">Kopyala</button>
+          <button class="btn-secondary mini-btn" onclick="editReservation('${esc(row['Booking No'])}')">Düzenle</button>
+          <button class="btn-danger mini-btn"    onclick="deleteReservation('${esc(row['Booking No'])}')">Sil</button>
+        </div></td>
+      </tr>`).join('');
+  }
+
+  function createdTimeLabel(row) {
+    const d = toDate(row['Created At']);
+    return d ? `${pad(d.getHours())}:${pad(d.getMinutes())}` : '-';
+  }
+
+  // Tüm rezervasyonlar tablosu – Return kolonları dahil
+  function renderAllTable(rows, body) {
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="13" class="empty">Kayıt bulunamadı.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(row => `
+      <tr>
+        <td>${row.Date || '-'}</td>
+        <td>${row.Time || '-'}</td>
+        <td>${row['Passenger Name'] || '-'}</td>
+        <td>${row.Phone || '-'}</td>
+        <td>${row.From  || '-'}</td>
+        <td>${row.To    || '-'}</td>
+        <td>${row.Car   || '-'}</td>
+        <td>${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</td>
+        <td>${row['Return Date'] || '-'}</td>
+        <td>${row['Return Time'] || '-'}</td>
+        <td>${row['Return From'] || '-'}</td>
+        <td>${row['Return To']   || '-'}</td>
+        <td><div class="row-actions">
+          <button class="btn-secondary mini-btn" onclick="copyRowText('${esc(row['Booking No'])}')">Kopyala</button>
+          <button class="btn-secondary mini-btn" onclick="editReservation('${esc(row['Booking No'])}')">Düzenle</button>
+          <button class="btn-danger mini-btn"    onclick="deleteReservation('${esc(row['Booking No'])}')">Sil</button>
+        </div></td>
+      </tr>`).join('');
+  }
+
+  function renderCards(rows, el) {
+    if (!rows.length) { el.innerHTML = '<div class="empty">Kayıt bulunamadı.</div>'; return; }
+    el.innerHTML = rows.map(row => {
+      const returnInfo = (row['Return Date'] || row['Return From'])
+        ? `<div class="res-return">↩ ${row['Return Date']||''} ${row['Return Time']||''} • ${row['Return From']||''} → ${row['Return To']||''}</div>`
+        : '';
+      return `
+        <div class="res-card">
+          <div class="res-card-head">
+            <div>
+              <div class="res-name">${row['Passenger Name'] || '-'}</div>
+              <div class="res-line">${row.Phone || '-'}</div>
+            </div>
+            <div class="res-time">${row.Date || '-'}<br>${row.Time || '-'}</div>
+          </div>
+          <div class="res-line"><strong>From:</strong> ${row.From||'-'}</div>
+          <div class="res-line"><strong>To:</strong>   ${row.To  ||'-'}</div>
+          <div class="res-line"><strong>Car:</strong>  ${row.Car ||'-'} / <strong>Price:</strong> ${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</div>
+          ${returnInfo}
+          <div class="res-actions">
+            <button class="btn-secondary mini-btn" onclick="copyRowText('${esc(row['Booking No'])}')">Metni Kopyala</button>
+            <button class="btn-primary   mini-btn" onclick="editReservation('${esc(row['Booking No'])}')">Düzenle</button>
+            <button class="btn-danger    mini-btn" onclick="deleteReservation('${esc(row['Booking No'])}')">Sil</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function esc(v) { return String(v || '').replace(/'/g,"&#39;"); }
+
+  // ─── Filtreli satırlar ──────────────────────────────────────────────────────
+  function filteredRows() {
+    const query = (reservationSearch.value || '').toLowerCase().trim();
+    const now   = new Date();
+    const today = dayKey(now);
+    const tmrw  = new Date(now); tmrw.setDate(now.getDate() + 1);
+    const p7    = new Date(now); p7.setDate(now.getDate() + 7); p7.setHours(23,59,59,999);
+    const start = new Date(today + 'T00:00');
+
+    const rStartVal = (rangeStart && rangeStart.value) || '';
+    const rEndVal   = (rangeEnd && rangeEnd.value) || '';
+    const customRangeActive = !!(rStartVal || rEndVal);
+    const rStart = rStartVal ? new Date(rStartVal + 'T00:00:00') : null;
+    const rEnd   = rEndVal   ? new Date(rEndVal   + 'T23:59:59') : null;
+
+    const inRange = v => v && (!rStart || v >= rStart) && (!rEnd || v <= rEnd);
+    const matchingDates = row => {
+      const d  = rowDate(row);
+      const rd = rowReturnDate(row);
+      const candidates = [];
+
+      if (customRangeActive) {
+        if (inRange(d)) candidates.push(d);
+        if (inRange(rd)) candidates.push(rd);
+      } else if (activeFilter === 'today') {
+        if (d && dayKey(d) === today) candidates.push(d);
+        if (rd && dayKey(rd) === today) candidates.push(rd);
+      } else if (activeFilter === 'tomorrow') {
+        const tomorrowKey = dayKey(tmrw);
+        if (d && dayKey(d) === tomorrowKey) candidates.push(d);
+        if (rd && dayKey(rd) === tomorrowKey) candidates.push(rd);
+      } else if (activeFilter === 'week') {
+        if (d && d >= start && d <= p7) candidates.push(d);
+        if (rd && rd >= start && rd <= p7) candidates.push(rd);
+      } else if (activeFilter === 'month') {
+        if (d && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) candidates.push(d);
+        if (rd && rd.getMonth() === now.getMonth() && rd.getFullYear() === now.getFullYear()) candidates.push(rd);
+      } else {
+        if (d) candidates.push(d);
+        else if (rd) candidates.push(rd);
+      }
+
+      return candidates.sort((a, b) => a - b);
+    };
+
+    return sheetRows.filter(row => {
+      const dates = matchingDates(row);
+      let ok = activeFilter === 'all' && !customRangeActive ? true : dates.length > 0;
+
+      if (query) {
+        const searchable = [row['Passenger Name'], row.Phone, row.From, row.To, row.Car, row.Note,
+                            row['Return From'], row['Return To'], row['Flight Code'], row['Return Flight Code']]
+          .join(' ').toLowerCase();
+        ok = ok && searchable.includes(query);
+      }
+      return ok;
+    }).sort((a, b) => {
+      const aDate = matchingDates(a)[0] || rowDate(a) || rowReturnDate(a) || 0;
+      const bDate = matchingDates(b)[0] || rowDate(b) || rowReturnDate(b) || 0;
+      return aDate - bDate;
+    });
+  }
+
+  function filteredJobs() {
+    const visibleRows = filteredRows();
+    const jobs = buildTransferJobs(visibleRows);
+    const now   = new Date();
+    const today = dayKey(now);
+    const tmrw  = new Date(now); tmrw.setDate(now.getDate() + 1);
+    const start = new Date(today + 'T00:00');
+    const p7    = new Date(now); p7.setDate(now.getDate() + 7); p7.setHours(23,59,59,999);
+    const rStartVal = (rangeStart && rangeStart.value) || '';
+    const rEndVal   = (rangeEnd && rangeEnd.value) || '';
+    const customRangeActive = !!(rStartVal || rEndVal);
+    const rStart = rStartVal ? new Date(rStartVal + 'T00:00:00') : null;
+    const rEnd   = rEndVal   ? new Date(rEndVal + 'T23:59:59') : null;
+
+    return jobs.filter(job => {
+      const d = job.dateTime;
+      if (customRangeActive) return d && (!rStart || d >= rStart) && (!rEnd || d <= rEnd);
+      if (activeFilter === 'today') return dayKey(d) === today;
+      if (activeFilter === 'tomorrow') return dayKey(d) === dayKey(tmrw);
+      if (activeFilter === 'week') return d >= start && d <= p7;
+      if (activeFilter === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      return true;
+    });
+  }
+
+  function renderAll() {
+    const rows = filteredRows();
+    renderAllTable(rows, allTableBody);
+    renderCards(rows, allMobileCards);
+    allStatus.textContent = `${sheetRows.length} kayıt yüklendi, ${rows.length} kayıt gösteriliyor.`;
+  }
+
+  // "Bugün Alınanlar": rezervasyonun sisteme kaydedildiği an bugünse listeye girer.
+  // NOT: Bu, Sheets'te 'Created At' kolonu olmasını gerektirir. O kolon henüz yoksa
+  // (Apps Script güncellenmeden), liste boş görünür — eski verilere hiçbir zarar vermez.
+  function renderDaily() {
+    const today = dayKey(new Date());
+
+    const rows = sheetRows
+      .filter(row => {
+        const d = toDate(row['Created At']);
+        return d && dayKey(d) === today;
+      })
+      .sort((a, b) => (toDate(b['Created At'])||0) - (toDate(a['Created At'])||0)); // en yeni üstte
+
+    renderDailyTable(rows, dailyTableBody);
+    renderDailyCards(rows, dailyMobileCards);
+    dailySummary.value = buildDailySummary(rows);
+  }
+
+  // YENİ: "Bugün Alınanlar" için özel mobil kart görünümü — masaüstü tablosundaki
+  // "Alınma Saati" bilgisini (genel renderCards()'ta hiç gösterilmeyen) mobilde de gösterir.
+  // Diğer sekmelerin (Tüm Rezervasyonlar) mobil kartlarına dokunulmaz, onlar hâlâ genel
+  // renderCards() fonksiyonunu kullanmaya devam eder.
+  function renderDailyCards(rows, el) {
+    if (!rows.length) {
+      el.innerHTML = '<div class="empty">Bugün için henüz alınmış rezervasyon yok (veya \'Created At\' verisi henüz Sheets\'te tutulmuyor).</div>';
+      return;
+    }
+    el.innerHTML = rows.map(row => `
+      <div class="res-card">
+        <div class="res-card-head">
+          <div>
+            <div class="res-name">${row['Passenger Name'] || '-'}</div>
+            <div class="res-line">${row.Phone || '-'}</div>
+          </div>
+          <div class="res-time">Alındı: ${createdTimeLabel(row)}</div>
+        </div>
+        <div class="res-line"><strong>Transfer:</strong> ${row.Date||'-'} ${row.Time||'-'}</div>
+        <div class="res-line"><strong>From:</strong> ${row.From||'-'}</div>
+        <div class="res-line"><strong>To:</strong>   ${row.To  ||'-'}</div>
+        <div class="res-line"><strong>Car:</strong>  ${row.Car ||'-'} / <strong>Price:</strong> ${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</div>
+        <div class="res-actions">
+          <button class="btn-secondary mini-btn" onclick="copyRowText('${esc(row['Booking No'])}')">Metni Kopyala</button>
+          <button class="btn-primary   mini-btn" onclick="editReservation('${esc(row['Booking No'])}')">Düzenle</button>
+          <button class="btn-danger    mini-btn" onclick="deleteReservation('${esc(row['Booking No'])}')">Sil</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function buildDailySummary(rows) {
+    if (!rows.length) return 'Bugün için henüz yeni rezervasyon alınmadı (veya Created At verisi henüz aktif değil).';
+    return `Bugün toplam ${rows.length} rezervasyon alındı:\n` + rows.map(row =>
+      `- ${createdTimeLabel(row)} alındı / ${row['Passenger Name']||'-'} / Transfer: ${row.Date||'-'} ${row.Time||'-'} / ${row.From||'-'} → ${row.To||'-'}`
+    ).join('\n');
+  }
+
+  function buildSummary(rows) {
+    if (!rows.length) return 'Önümüzdeki 7 gün için rezervasyon yok.';
+    return rows.map(row =>
+      `- ${row.Date||'-'} / ${row.Time||'-'} / ${row['Passenger Name']||'-'} / ${row.From||'-'} → ${row.To||'-'} / ${row.Car||'-'}${rowMissing(row) ? ' / Eksik kontrol var' : ' / OK'}`
+    ).join('\n');
+  }
+
+  // ─── Özet (Dashboard) ───────────────────────────────────────────────────────
+  function setDashGreeting() {
+    const now  = new Date();
+    const hour = now.getHours();
+    const greeting = hour < 12 ? 'Günaydın!' : (hour < 18 ? 'İyi günler!' : 'İyi akşamlar!');
+    const days   = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+    const months = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    dashGreeting.textContent = greeting;
+    dashDate.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} • ${days[now.getDay()]}`;
+  }
+
+  function setRevenueVisibility(show) {
+    revenueRevealed = !!show;
+    statRevenueCard.classList.toggle('is-revealed', revenueRevealed);
+    statRevenueCard.setAttribute('aria-pressed', String(revenueRevealed));
+    statRevenueCard.setAttribute('aria-label', revenueRevealed ? 'Aylık ciroyu gizle' : 'Aylık ciroyu göster');
+    toggleRevenueBtn.setAttribute('aria-pressed', String(revenueRevealed));
+    revenueToggleLabel.textContent = revenueRevealed ? 'Ciroyu gizle' : 'Ciroyu göster';
+  }
+
+  function toggleRevenueVisibility() {
+    setRevenueVisibility(!revenueRevealed);
+  }
+
+  function showDashboardJobs(day) {
+    dashboardJobsDay = day === 'tomorrow' ? 'tomorrow' : 'today';
+    const showTomorrow = dashboardJobsDay === 'tomorrow';
+
+    todayJobsView.classList.toggle('hidden', showTomorrow);
+    tomorrowJobsView.classList.toggle('hidden', !showTomorrow);
+    showTodayJobsBtn.classList.toggle('active', !showTomorrow);
+    showTomorrowJobsBtn.classList.toggle('active', showTomorrow);
+    statTodayCard.classList.toggle('active', !showTomorrow);
+    statTomorrowCard.classList.toggle('active', showTomorrow);
+    showTodayJobsBtn.setAttribute('aria-selected', String(!showTomorrow));
+    showTomorrowJobsBtn.setAttribute('aria-selected', String(showTomorrow));
+    copyTomorrowJobsBtn.classList.toggle('hidden', !showTomorrow);
+    jobsOrderNote.textContent = showTomorrow
+      ? `Yarın • ${tomorrowJobsSwitchCount.textContent || '0'} iş • gerçek saat sırası`
+      : `Bugün • ${todayJobsSwitchCount.textContent || '0'} iş • gerçek saat sırası`;
+  }
+
+  function renderDashboard() {
+    setDashGreeting();
+    const now       = new Date();
+    const todayKey  = dayKey(now);
+    const tomorrow  = new Date(now); tomorrow.setDate(now.getDate() + 1);
+    const tomorrowKey = dayKey(tomorrow);
+    const weekStart = new Date(todayKey + 'T00:00:00');
+    const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7); weekEnd.setHours(23,59,59,999);
+
+    const allJobs      = buildTransferJobs(sheetRows);
+    const todayJobs    = jobsForDay(allJobs, todayKey);
+    const tomorrowJobs = jobsForDay(allJobs, tomorrowKey);
+    const weekJobs     = allJobs.filter(job => job.dateTime >= weekStart && job.dateTime <= weekEnd);
+
+    renderRevenueCard();
+
+    statToday.textContent             = String(todayJobs.length);
+    statTomorrow.textContent          = String(tomorrowJobs.length);
+    statWeek.textContent              = String(weekJobs.length);
+    todayJobsLabel.textContent        = `${todayJobs.length} iş`;
+    todayJobsSwitchCount.textContent  = String(todayJobs.length);
+    tomorrowJobsSwitchCount.textContent = String(tomorrowJobs.length);
+
+    renderJobTable(todayJobs, todayTransfersBody, 'Bugün için iş yok.', true);
+    renderJobCards(todayJobs, todayTransfersMobile, 'Bugün için iş yok.', true);
+
+    renderJobTable(tomorrowJobs, tomorrowTransfersBody, 'Yarın için iş yok.', false);
+    renderJobCards(tomorrowJobs, tomorrowTransfersMobile, 'Yarın için iş yok.', false);
+    tomorrowJobsSummary.value = buildJobsSummary(tomorrowJobs, `${formatDate(tomorrowKey)} yarının işleri`);
+    tomorrowJobsStatus.textContent = tomorrowJobs.length
+      ? `${tomorrowJobs.length} iş hazır. Aynı gün gidiş-dönüş tek satırda gösterilir.`
+      : 'Yarın için planlanmış iş bulunmuyor.';
+
+    showDashboardJobs(dashboardJobsDay);
+  }
+
+  // Ciro rezervasyon bazında hesaplanır. Gidiş ve dönüş ayrı iş görünse de fiyat yalnızca bir kez toplanır.
+  let revenueViewDate = new Date();
+  const TR_MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+
+  function renderRevenueCard() {
+    const viewMonth = revenueViewDate.getMonth();
+    const viewYear  = revenueViewDate.getFullYear();
+    const monthRevenue = {};
+    let count = 0;
+
+    sheetRows.forEach(row => {
+      const d = rowDate(row);
+      if (d && d.getMonth() === viewMonth && d.getFullYear() === viewYear) {
+        count++;
+        if (row.Price) {
+          const cur = row.Currency || 'EUR';
+          monthRevenue[cur] = (monthRevenue[cur] || 0) + (parseFloat(row.Price) || 0);
+        }
+      }
+    });
+
+    const revenueText = Object.keys(monthRevenue).length
+      ? Object.entries(monthRevenue).map(([cur, sum]) => `${Math.round(sum).toLocaleString('tr-TR')} ${cur}`).join(' + ')
+      : '–';
+
+    const now = new Date();
+    const isCurrentMonth = viewMonth === now.getMonth() && viewYear === now.getFullYear();
+    revMonthLabel.textContent    = `${TR_MONTHS[viewMonth]} ${viewYear}`.toUpperCase() + (isCurrentMonth ? ' (BU AY)' : '');
+    statMonthRevenue.textContent = revenueText;
+    revMonthSub.textContent      = `${count} rezervasyon • ücret her rezervasyonda bir kez sayılır`;
+  }
+
+  function renderJobTable(jobs, body, emptyText, showUrgency) {
+    if (!jobs.length) {
+      body.innerHTML = `<tr><td colspan="10" class="empty">${emptyText}</td></tr>`;
+      return;
+    }
+
+    const now = new Date();
+    body.innerHTML = jobs.map(job => {
+      const row = job.row;
+      const nextOperationDate = jobNextOperationDate(job, now);
+      const msUntil = nextOperationDate - now;
+      const isUrgent = !!showUrgency && msUntil > 0 && msUntil <= 3 * 60 * 60 * 1000;
+      const urgentBadge = isUrgent ? '<span class="urgent-badge">Yaklaşıyor</span>' : '';
+      return `
+        <tr class="job-row job-row-${job.type}${isUrgent ? ' urgent-row' : ''}">
+          <td class="job-time-cell">${jobTimeHtml(job)}${urgentBadge}</td>
+          <td class="job-type-cell">${jobBadgeHtml(job)}</td>
+          <td class="job-passenger-cell">${row['Passenger Name'] || '-'}</td>
+          <td class="job-phone-cell">${row.Phone || '-'}</td>
+          <td class="job-flight-cell">${jobFlightHtml(job)}</td>
+          <td class="job-route-cell">${jobRoutePartHtml(job, 'from')}</td>
+          <td class="job-route-cell">${jobRoutePartHtml(job, 'to')}</td>
+          <td class="job-vehicle-cell">${row.Car || '-'}</td>
+          <td class="job-price-cell">${jobPriceHtml(job)}</td>
+          <td class="job-actions-cell"><div class="row-actions">
+            <button class="btn-secondary mini-btn action-copy" onclick="copyRowText('${esc(row['Booking No'])}')">Kopyala</button>
+            <button class="btn-secondary mini-btn action-edit" onclick="editReservation('${esc(row['Booking No'])}')">Düzenle</button>
+            <button class="btn-danger mini-btn action-delete" onclick="deleteReservation('${esc(row['Booking No'])}')">Sil</button>
+          </div></td>
+        </tr>`;
+    }).join('');
+  }
+
+  function timeUntilLabel(ms) {
+    const totalMin = Math.max(0, Math.round(ms / 60000));
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return h > 0 ? `${h}s ${m}dk kaldı` : `${m}dk kaldı`;
+  }
+
+  function renderJobCards(jobs, el, emptyText, showUrgency) {
+    if (!jobs.length) { el.innerHTML = `<div class="empty">${emptyText}</div>`; return; }
+    const now = new Date();
+
+    el.innerHTML = jobs.map(job => {
+      const row = job.row;
+      const nextOperationDate = jobNextOperationDate(job, now);
+      const msUntil = nextOperationDate - now;
+      const isUrgent = !!showUrgency && msUntil > 0 && msUntil <= 3 * 60 * 60 * 1000;
+      const urgentBadge = isUrgent ? '<span class="urgent-badge">Yaklaşıyor</span>' : '';
+      const countdownLine = isUrgent ? `<div class="res-line urgent-countdown">⏱ ${timeUntilLabel(msUntil)}</div>` : '';
+      const price = row.Price ? `${row.Price} ${row.Currency || ''}` : '-';
+      const priceNote = hasReturnLeg(row) ? 'gidiş + dönüş toplamı' : 'rezervasyon toplamı';
+
+      const routeContent = job.type === 'roundtrip'
+        ? `<div class="combined-route-block">${job.legs.map(leg => `
+            <div class="combined-route-line">
+              <span class="job-leg-key${leg.type === 'return' ? ' return' : ''}">${leg.shortLabel}</span>
+              <strong>${leg.time || '-'}</strong>
+              <span>${leg.from || '-'} → ${leg.to || '-'}</span>
+            </div>`).join('')}
+          </div>`
+        : `<div class="res-line"><strong>From:</strong> ${job.from || '-'}</div>
+           <div class="res-line"><strong>To:</strong> ${job.to || '-'}</div>`;
+
+      return `
+        <div class="res-card${isUrgent ? ' urgent-card' : ''}">
+          <div class="res-card-head">
+            <div>
+              <div class="res-name">${row['Passenger Name'] || '-'}</div>
+              <div class="res-line">${row.Phone || '-'}</div>
+            </div>
+            <div class="res-time">${job.type === 'roundtrip' ? '' : (job.time || '-') + ' '}${urgentBadge}<br>${jobBadgeHtml(job)}</div>
+          </div>
+          ${countdownLine}
+          <div class="res-line"><strong>Uçuş:</strong> ${jobFlightHtml(job)}</div>
+          ${routeContent}
+          <div class="res-line"><strong>Car:</strong> ${row.Car || '-'}</div>
+          <div class="res-line"><strong>Toplam:</strong> ${price} <span class="total-price-note">${priceNote}</span></div>
+          <div class="res-actions">
+            <button class="btn-secondary mini-btn" onclick="copyRowText('${esc(row['Booking No'])}')">Metni Kopyala</button>
+            <button class="btn-primary mini-btn" onclick="editReservation('${esc(row['Booking No'])}')">Düzenle</button>
+            <button class="btn-danger mini-btn" onclick="deleteReservation('${esc(row['Booking No'])}')">Sil</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ─── Satırdan form doldur ───────────────────────────────────────────────────
+  function rowToData(row) {
+    return {
+      bookingNo     : row['Booking No'],
+      serviceType   : row['Service Type'] || 'Transfer',
+      hasReturn     : row['Transfer Type'] === 'Arrival + Return' || !!row['Return Date'],
+      flyCode       : row['Flight Code'],
+      bookingDate   : '',
+      nameSurname   : row['Passenger Name'],
+      phone         : row.Phone,
+      passengerCount: row.Person,
+      vehicle       : row.Car,
+      pickup        : row.From,
+      dropoff       : row.To,
+      dateTime      : dateTimeFromRow(row.Date, row.Time),
+      amount        : row.Price,
+      currency      : row.Currency || 'EUR',
+      paymentMethod : '',
+      note          : row.Note,
+      returnFlyCode : row['Return Flight Code'],
+      returnPickup  : row['Return From'] || '',
+      returnDropoff : row['Return To']   || '',
+      returnDateTime: dateTimeFromRow(row['Return Date'], row['Return Time'])
+    };
+  }
+
+  function fillForm(data) {
+    editingBookingNo = data.bookingNo || '';
+    setService(data.serviceType);
+    hasReturn.checked = !!data.hasReturn;
+    setVal('flyCode',        data.flyCode);
+    setVal('bookingDate',    data.bookingDate);
+    setVal('nameSurname',    data.nameSurname);
+    setVal('phone',          data.phone);
+    setVal('passengerCount', data.passengerCount);
+    setVal('vehicle',        data.vehicle);
+    setVal('pickup',         data.pickup);
+    setVal('dropoff',        data.dropoff);
+    setVal('dateTime',       data.dateTime);
+    setVal('amount',         data.amount);
+    setVal('currency',       data.currency || 'EUR');
+    setVal('paymentMethod',  data.paymentMethod);
+    setVal('note',           data.note);
+    setVal('returnFlyCode',  data.returnFlyCode);
+    setVal('returnPickup',   data.returnPickup);
+    setVal('returnDropoff',  data.returnDropoff);
+    setVal('returnDateTime', data.returnDateTime);
+    updatePreview();
+    activate('pdfTab');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ─── Global fonksiyonlar (onclick="..." için) ───────────────────────────────
+  window.editReservation   = bookingNo => {
+    const row = sheetRows.find(r => String(r['Booking No']) === String(bookingNo));
+    if (row) fillForm(rowToData(row));
+  };
+  window.deleteReservation = deleteReservation;
+  window.copyRowText       = async bookingNo => {
+    const row = sheetRows.find(r => String(r['Booking No']) === String(bookingNo));
+    if (!row) return;
+    await navigator.clipboard.writeText(reservationTxt(rowToData(row)));
+    allStatus.textContent = 'Rezervasyon metni kopyalandı.';
+  };
+
+  // ─── Event listeners ────────────────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.addEventListener('click', () => activate(b.dataset.tab)));
+
+  document.querySelectorAll('.filter-btn').forEach(b =>
+    b.addEventListener('click', e => {
+      e.preventDefault();
+      activeFilter = b.dataset.filter;
+      document.querySelectorAll('.filter-btn').forEach(x => x.classList.toggle('active', x === b));
+      renderAll();
+    }));
+
+  reservationSearch.addEventListener('input', renderAll);
+  rangeStart.addEventListener('change', renderAll);
+  rangeEnd.addEventListener('change', renderAll);
+  clearRangeBtn.addEventListener('click', () => {
+    rangeStart.value = '';
+    rangeEnd.value   = '';
+    renderAll();
+  });
+  form.addEventListener('input',  updatePreview);
+  form.addEventListener('change', updatePreview);
+
+  saveSheetBtn.addEventListener('click', save);
+  newReservationBtn.addEventListener('click', resetNew);
+  downloadPdfBtn.addEventListener('click', downloadPdf);
+  copyTextBtn.addEventListener('click', copyText);
+  copyInfoTextBtn.addEventListener('click', copyText);
+  copyReminderGroupBtn.addEventListener('click', copyReminderGroupText);
+  showTodayJobsBtn.addEventListener('click', () => showDashboardJobs('today'));
+  showTomorrowJobsBtn.addEventListener('click', () => showDashboardJobs('tomorrow'));
+  statTodayCard.addEventListener('click', () => showDashboardJobs('today'));
+  statTomorrowCard.addEventListener('click', () => showDashboardJobs('tomorrow'));
+  statTodayCard.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showDashboardJobs('today'); }
+  });
+  statTomorrowCard.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showDashboardJobs('tomorrow'); }
+  });
+  copyTomorrowJobsBtn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(tomorrowJobsSummary.value || '');
+    tomorrowJobsStatus.textContent = 'Yarının liste metni kopyalandı.';
+  });
+  loadSheetBtn.addEventListener('click', loadRows);
+  loadAllBtn.addEventListener('click', loadRows);
+  refreshDashboardBtn.addEventListener('click', loadRows);
+  statRevenueCard.addEventListener('click', event => {
+    if (event.target.closest('.month-nav-btn')) return;
+    toggleRevenueVisibility();
+  });
+  statRevenueCard.addEventListener('keydown', event => {
+    if (event.target.closest('button')) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleRevenueVisibility();
+    }
+  });
+  toggleRevenueBtn.addEventListener('click', event => {
+    event.stopPropagation();
+    toggleRevenueVisibility();
+  });
+  revMonthPrev.addEventListener('click', event => {
+    event.stopPropagation();
+    revenueViewDate.setMonth(revenueViewDate.getMonth() - 1);
+    renderRevenueCard();
+  });
+  revMonthNext.addEventListener('click', event => {
+    event.stopPropagation();
+    revenueViewDate.setMonth(revenueViewDate.getMonth() + 1);
+    renderRevenueCard();
+  });
+
+
+  copyDailySummaryBtn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(dailySummary.value || '');
+    sheetStatus.textContent = 'Bugünkü özet kopyalandı.';
+  });
+
+  copyListSummaryBtn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(buildJobsSummary(filteredJobs(), 'Liste özeti'));
+    allStatus.textContent = 'Liste özeti kopyalandı.';
+  });
+
+  // ─── İlk render ─────────────────────────────────────────────────────────────
+  document.querySelector('.app').setAttribute('inert', '');
+  if (sessionStorage.getItem(AUTH_SESSION_KEY) === 'ok') {
+    unlockApplication();
+  } else {
+    lockApplication();
+  }
+</script>
+</body>
+</html>
