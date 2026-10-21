@@ -922,96 +922,112 @@
     }
   
 
-/* ISTANBUL MONOCHROME / BLACK & WHITE – GÖRSEL DÜZENLEME */
+/* ISTANBUL · KURUMSAL MAVI & FILDISI — 2026 */
 :root {
-  --bg:#0e0e0e; --panel:#171717; --panel2:#242424;
-  --line:#3a3a3a; --text:#f5f5f5; --muted:#b1b1b1;
-  --gold:#e5e5e5; --gold2:#ffffff;
-  --green:#d6d6d6; --red:#b4b4b4; --orange:#c2c2c2;
-  --radius:14px; --shadow:0 12px 36px rgba(0,0,0,.32);
+  --bg:#f4f5f3; --panel:#fffdf8; --panel2:#edf1f3;
+  --line:#dce2e6; --text:#2b3946; --muted:#687784;
+  --gold:#476b89; --gold2:#355b79;
+  --green:#507c68; --red:#a96363; --orange:#967b51;
+  --radius:15px; --shadow:0 5px 22px rgba(38,58,73,.045);
 }
-body, .login-gate {
-  background:#0e0e0e !important;
-  color:#f5f5f5;
+html {color-scheme:light;}
+body,body.auth-locked,.login-gate {
+  background:#f4f5f3 !important; color:var(--text);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
 }
 .panel,.login-card {
-  background:#171717 !important;
-  border:1px solid #303030;
+  background:#fffdf8 !important; border:1px solid #e0e5e7 !important;
+  box-shadow:0 4px 24px rgba(38,58,73,.055) !important;
 }
-.card,.res-card,.stat-card {
-  background:#202020 !important;
-  border-color:#373737 !important;
-}
-.dashboard-overview-card,.dashboard-job-switch {
-  background:#202020 !important;
-}
-.login-mark {
-  color:#111 !important;
-  background:#f2f2f2 !important;
+.login-mark {background:#e5eef4 !important;color:#426786 !important;box-shadow:none !important;}
+h1,h2,.dash-greeting,.res-name,.job-passenger-cell {color:#293e4e !important;letter-spacing:-.025em;}
+h1 {font-weight:740;font-size:24px;}
+h2 {font-weight:720;}
+.sub,.hint,.status-line,.stat-sub,.jobs-feedback-line,.jobs-order-note {color:#72808c !important;}
+.section-title {color:#456780 !important;border-bottom-color:#e5e9eb !important;letter-spacing:.07em;}
+label {color:#536574 !important;font-weight:600;}
+input,select,textarea,.text-output,.summary-output {
+  background:#ffffff !important;color:#344654 !important;
+  border:1px solid #d7e0e5 !important;border-radius:10px;
   box-shadow:none !important;
 }
-.section-title {color:#fafafa !important; border-color:#3b3b3b;}
-input,select,textarea {
-  background:#222 !important;
-  color:#f5f5f5 !important;
-  border:1px solid #444 !important;
-}
+input::placeholder,textarea::placeholder {color:#9da9b2;}
 input:focus,select:focus,textarea:focus {
-  border-color:#eee !important;
-  background:#292929 !important;
+  background:#fff !important; border-color:#7897ad !important;
+  box-shadow:0 0 0 3px rgba(65,105,135,.10) !important;
 }
-option {background:#242424 !important;color:#fff !important;}
-.btn-primary {
-  background:#f2f2f2 !important;
-  color:#111 !important;
-  border:1px solid #f2f2f2 !important;
+option {background:#fff !important;color:#293e4e !important;}
+button {font-weight:650;letter-spacing:0;transition:background-color .15s,border-color .15s,box-shadow .15s,transform .15s;}
+button:hover {filter:none !important;transform:none;}
+.btn-primary {background:#426985 !important;color:#fff !important;border:1px solid #426985 !important;box-shadow:none !important;}
+.btn-primary:hover {background:#365a73 !important;}
+.btn-secondary,.btn-warning,.btn-danger,.btn-success,.mini-btn,.tab-btn,.filter-btn,.job-switch-btn,.month-nav-btn {
+  background:#f6f7f6 !important;color:#526573 !important;border:1px solid #dfe5e7 !important;
+  box-shadow:none !important;
 }
-.btn-secondary,.btn-success,.btn-warning,.btn-danger,.tab-btn,
-.filter-btn,.job-switch-btn,.mini-btn,.month-nav-btn {
-  background:#292929 !important;
-  color:#e8e8e8 !important;
-  border:1px solid #484848 !important;
-}
-button:hover {filter:brightness(1.14);}
+.btn-secondary:hover,.tab-btn:hover,.filter-btn:hover,.mini-btn:hover {background:#eaf0f2 !important;}
+.btn-success {color:#426f59 !important;border-color:#cbded2 !important;background:#edf5f0 !important;}
+.btn-danger,.action-delete {color:#945656 !important;border-color:#e5d0d0 !important;background:#fbf3f2 !important;}
+.btn-warning {color:#897247 !important;background:#f7f3e9 !important;border-color:#e5dcc6 !important;}
 .tab-btn.active,.filter-btn.active,.job-switch-btn.active,
 .radio-card input:checked + span,.check-card input:checked + span {
-  background:#eaeaea !important;
-  border-color:#fff !important;
-  color:#111 !important;
+  background:#e6eef3 !important;color:#345c7a !important;border:1px solid #b8cbd8 !important;
   box-shadow:none !important;
 }
-.radio-card span,.check-card span {background:#262626;border-color:#474747;color:#eaeaea;}
-.job-switch-btn.active .job-switch-count {background:#cdcdcd !important;color:#111 !important;}
+.radio-card span,.check-card span {background:#f7f8f7 !important;color:#657683 !important;border-color:#dfe5e7 !important;font-weight:600;}
+.card,.res-card,.stat-card,.dashboard-overview-card,.dashboard-job-switch {
+  background:#fffdf9 !important;border:1px solid #e1e6e8 !important;box-shadow:none !important;
+}
+.dashboard-job-switch {background:#f1f4f5 !important;}
 .stat-card-today,.stat-card-tomorrow,.stat-card-week,.stat-card-revenue {
-  color:#f4f4f4 !important;
+  color:#36566e !important;background:#f5f7f7 !important;border-color:#e0e7ea !important;
 }
-.stat-label,.stat-sub,.hint,.sub,.status-line {color:#b6b6b6 !important;}
-.stat-value,.dash-greeting,.job-time-cell,.job-price-cell,.res-time {color:#f5f5f5 !important;}
-.revenue-mask {background:#2c2c2c !important;border-color:#696969 !important;color:#fff !important;}
-.job-badge,.job-badge.return,.job-badge.roundtrip,.job-leg-key,.job-leg-key.return,
-.flight-code-chip,.urgent-badge,.pill-orange,.pill-green {
-  background:#333 !important; color:#efefef !important; border-color:#626262 !important;
+.stat-card.active,.stat-card-clickable.active {border-color:#9cb6c7 !important;box-shadow:0 0 0 1px #cddde7 !important;}
+.stat-card::after {opacity:.025 !important;}
+.stat-label {color:#697b87 !important;}
+.stat-value {color:#314c61 !important;}
+.stat-sub {color:#89949d !important;}
+.revenue-mask {background:#e9f0f4 !important;color:#476983 !important;border-color:#cfdee7 !important;backdrop-filter:none !important;}
+.revenue-mask:hover {background:#dae7ee !important;border-color:#b7cddd !important;}
+.month-nav-btn {color:#4c6d84 !important;}
+.job-switch-btn.active .job-switch-count {background:#c9dce7 !important;color:#345b77 !important;}
+.job-badge,.job-leg-key,.flight-code-chip {background:#eaf1f5 !important;color:#456985 !important;border-color:#cddfe9 !important;}
+.job-badge.return,.job-leg-key.return {background:#f0edf4 !important;color:#766581 !important;border-color:#ddd5e2 !important;}
+.job-badge.roundtrip {background:#ecf0f4 !important;color:#536b7d !important;border-color:#d3dde4 !important;}
+.table-wrap,.combined-route-block {background:#fff !important;border-color:#e1e7ea !important;}
+th {background:#edf2f4 !important;color:#536b7c !important;box-shadow:none !important;font-weight:720;}
+th,td {border-bottom-color:#e9eef0 !important;}
+td,.job-route-cell,.job-vehicle-cell,.job-flight-cell,.res-line,.res-return,.combined-route-line {color:#415563 !important;}
+tbody tr:nth-child(even) td {background:#fafbfa !important;}
+tbody tr:hover td {background:#edf3f6 !important;}
+.job-time-cell,.res-time,.job-price-cell {color:#365f7a !important;}
+.job-passenger-cell {font-weight:700;}
+.flight-empty,.empty {color:#8796a1 !important;}
+.urgent-row td,.res-card.urgent-card {background:#fcf8ec !important;border-color:#e9dfc7 !important;}
+.urgent-countdown {color:#937749 !important;}
+.urgent-badge,.pill-orange {background:#f7f0df !important;color:#917244 !important;border-color:#e8dcc0 !important;}
+.pill-green {background:#e9f3ed !important;color:#50775d !important;border-color:#c9dfcf !important;}
+.missing-box {background:#faf5e9 !important;color:#886e44 !important;border-color:#e9d9b9 !important;}
+.ok-box {background:#edf6ef !important;color:#476f53 !important;border-color:#cfe5d5 !important;}
+.edit-banner {background:#eaf1f5 !important;color:#426782 !important;border-color:#cbdce6 !important;}
+.text-output,.summary-output {background:#fff !important;color:#344654 !important;}
+.res-card {background:#fff !important;}
+/* PDF ayri, basima uygun ve okunakli */
+.voucher-page,.voucher-section {background:#fff !important;color:#233444 !important;}
+.voucher-header {background:#365b77 !important;border-color:#365b77 !important;color:#fff !important;}
+.voucher-subtitle {color:#e7edf1 !important;}
+.voucher-section-title {color:#41657e !important;border-color:#e5ebee !important;}
+.voucher-section.policy-notice {background:#f5f7f6 !important;border-color:#dce4e7 !important;}
+.label-cell {color:#6b7b87 !important;}
+.value-cell,.service-notes {color:#2b3e4e !important;}
+@media (max-width:768px) {
+  .app {padding:10px;gap:10px;}
+  .tab-btn {padding:10px 12px;}
+  .res-card {box-shadow:0 2px 9px rgba(40,60,70,.035) !important;}
 }
-.table-wrap,.combined-route-block {background:#181818 !important;border-color:#343434 !important;}
-th {background:#303030 !important;color:#fff !important;}
-td,.job-route-cell,.job-vehicle-cell,.job-flight-cell,.res-line,.res-return,
-.combined-route-line {color:#ebebeb !important;}
-tbody tr:hover td {background:#303030 !important;}
-.urgent-row td,.urgent-row:hover td,.res-card.urgent-card {background:#303030 !important;}
-.text-output,.summary-output {background:#121212 !important;color:#eee !important;}
-.missing-box,.ok-box,.edit-banner {background:#252525 !important;border-color:#555 !important;color:#eee !important;}
-/* PDF: beyaz kağıt, siyah metin ve gri başlık */
-.voucher-page,.voucher-section {background:#fff !important;color:#181818 !important;}
-.voucher-header {background:#242424 !important;border-color:#242424 !important;color:#fff !important;}
-.voucher-subtitle {color:#eee !important;}
-.voucher-section-title {color:#333 !important;border-color:#ddd !important;}
-.voucher-section.policy-notice {background:#f4f4f4 !important;border-color:#ccc !important;}
-.label-cell {color:#555 !important;}
-.value-cell,.service-notes {color:#222 !important;}
-@media print {
-  body {background:#fff !important;}
-  .voucher-page {box-shadow:none !important;}
-}
+@media print {body {background:#fff !important;} .voucher-page {box-shadow:none !important;}}
+
 </style>
 </head>
 <body class="auth-locked">
@@ -1260,10 +1276,10 @@ tbody tr:hover td {background:#303030 !important;}
               <thead>
                 <tr>
                   <th>Saat</th><th>Tür</th><th>Ad Soyad</th><th>Telefon</th><th>Uçuş</th><th>From</th><th>To</th>
-                  <th>Araç</th><th>Toplam Fiyat</th><th>İşlem</th>
+                  <th>Araç</th><th>Kişi</th><th>Toplam Fiyat</th><th>İşlem</th>
                 </tr>
               </thead>
-              <tbody id="todayTransfersBody"><tr><td colspan="10" class="empty">Yükleniyor...</td></tr></tbody>
+              <tbody id="todayTransfersBody"><tr><td colspan="11" class="empty">Yükleniyor...</td></tr></tbody>
             </table>
           </div>
           <div id="todayTransfersMobile" class="mobile-cards"></div>
@@ -1276,10 +1292,10 @@ tbody tr:hover td {background:#303030 !important;}
               <thead>
                 <tr>
                   <th>Saat</th><th>Tür</th><th>Ad Soyad</th><th>Telefon</th><th>Uçuş</th><th>From</th><th>To</th>
-                  <th>Araç</th><th>Toplam Fiyat</th><th>İşlem</th>
+                  <th>Araç</th><th>Kişi</th><th>Toplam Fiyat</th><th>İşlem</th>
                 </tr>
               </thead>
-              <tbody id="tomorrowTransfersBody"><tr><td colspan="10" class="empty">Yükleniyor...</td></tr></tbody>
+              <tbody id="tomorrowTransfersBody"><tr><td colspan="11" class="empty">Yükleniyor...</td></tr></tbody>
             </table>
           </div>
           <div id="tomorrowTransfersMobile" class="mobile-cards"></div>
@@ -1422,10 +1438,10 @@ tbody tr:hover td {background:#303030 !important;}
               <tr>
                 <th>Alınma Saati</th><th>Ad Soyad</th><th>Telefon</th>
                 <th>Transfer Tarihi</th><th>Transfer Saati</th>
-                <th>From</th><th>To</th><th>Araç</th><th>Fiyat</th><th>İşlem</th>
+                <th>From</th><th>To</th><th>Araç</th><th>Kişi</th><th>Fiyat</th><th>İşlem</th>
               </tr>
             </thead>
-            <tbody id="dailyTableBody"><tr><td colspan="10" class="empty">Henüz veri yüklenmedi.</td></tr></tbody>
+            <tbody id="dailyTableBody"><tr><td colspan="11" class="empty">Henüz veri yüklenmedi.</td></tr></tbody>
           </table>
         </div>
         <div id="dailyMobileCards" class="mobile-cards"></div>
@@ -1464,12 +1480,12 @@ tbody tr:hover td {background:#303030 !important;}
             <thead>
               <tr>
                 <th>Tarih</th><th>Saat</th><th>Ad Soyad</th><th>Telefon</th>
-                <th>From</th><th>To</th><th>Araç</th><th>Fiyat</th>
+                <th>From</th><th>To</th><th>Araç</th><th>Kişi</th><th>Fiyat</th>
                 <th>Dönüş Tarihi</th><th>Dönüş Saati</th><th>Dönüş From</th><th>Dönüş To</th>
                 <th>İşlem</th>
               </tr>
             </thead>
-            <tbody id="allTableBody"><tr><td colspan="13" class="empty">Henüz veri yüklenmedi.</td></tr></tbody>
+            <tbody id="allTableBody"><tr><td colspan="14" class="empty">Henüz veri yüklenmedi.</td></tr></tbody>
           </table>
         </div>
         <div id="allMobileCards" class="mobile-cards"></div>
@@ -2371,7 +2387,7 @@ ${FIXED_BRAND}`.trim();
   // Bugün Alınanlar tablosu — transfer tarihine göre değil, kaydın SİSTEME düştüğü ana göre
   function renderDailyTable(rows, body) {
     if (!rows.length) {
-      body.innerHTML = '<tr><td colspan="10" class="empty">Bugün için henüz alınmış rezervasyon yok (veya \'Created At\' verisi henüz Sheets\'te tutulmuyor).</td></tr>';
+      body.innerHTML = '<tr><td colspan="11" class="empty">Bugün için henüz alınmış rezervasyon yok (veya \'Created At\' verisi henüz Sheets\'te tutulmuyor).</td></tr>';
       return;
     }
     body.innerHTML = rows.map(row => `
@@ -2384,6 +2400,7 @@ ${FIXED_BRAND}`.trim();
         <td>${row.From || '-'}</td>
         <td>${row.To   || '-'}</td>
         <td>${row.Car  || '-'}</td>
+        <td class="people-cell">${row.Person || '-'}</td>
         <td>${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</td>
         <td><div class="row-actions">
           <button class="btn-secondary mini-btn" onclick="copyRowText('${esc(row['Booking No'])}')">Kopyala</button>
@@ -2401,7 +2418,7 @@ ${FIXED_BRAND}`.trim();
   // Tüm rezervasyonlar tablosu – Return kolonları dahil
   function renderAllTable(rows, body) {
     if (!rows.length) {
-      body.innerHTML = '<tr><td colspan="13" class="empty">Kayıt bulunamadı.</td></tr>';
+      body.innerHTML = '<tr><td colspan="14" class="empty">Kayıt bulunamadı.</td></tr>';
       return;
     }
     body.innerHTML = rows.map(row => `
@@ -2413,6 +2430,7 @@ ${FIXED_BRAND}`.trim();
         <td>${row.From  || '-'}</td>
         <td>${row.To    || '-'}</td>
         <td>${row.Car   || '-'}</td>
+        <td class="people-cell">${row.Person || '-'}</td>
         <td>${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</td>
         <td>${row['Return Date'] || '-'}</td>
         <td>${row['Return Time'] || '-'}</td>
@@ -2443,6 +2461,7 @@ ${FIXED_BRAND}`.trim();
           </div>
           <div class="res-line"><strong>From:</strong> ${row.From||'-'}</div>
           <div class="res-line"><strong>To:</strong>   ${row.To  ||'-'}</div>
+          <div class="res-line"><strong>Yolcu:</strong> ${row.Person ||'-'} kişi</div>
           <div class="res-line"><strong>Car:</strong>  ${row.Car ||'-'} / <strong>Price:</strong> ${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</div>
           ${returnInfo}
           <div class="res-actions">
@@ -2590,7 +2609,8 @@ ${FIXED_BRAND}`.trim();
         <div class="res-line"><strong>Transfer:</strong> ${row.Date||'-'} ${row.Time||'-'}</div>
         <div class="res-line"><strong>From:</strong> ${row.From||'-'}</div>
         <div class="res-line"><strong>To:</strong>   ${row.To  ||'-'}</div>
-        <div class="res-line"><strong>Car:</strong>  ${row.Car ||'-'} / <strong>Price:</strong> ${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</div>
+        <div class="res-line"><strong>Yolcu:</strong> ${row.Person ||'-'} kişi</div>
+          <div class="res-line"><strong>Car:</strong>  ${row.Car ||'-'} / <strong>Price:</strong> ${row.Price ? `${row.Price} ${row.Currency||''}` : '-'}</div>
         <div class="res-actions">
           <button class="btn-secondary mini-btn" onclick="copyRowText('${esc(row['Booking No'])}')">Metni Kopyala</button>
           <button class="btn-primary   mini-btn" onclick="editReservation('${esc(row['Booking No'])}')">Düzenle</button>
@@ -2725,7 +2745,7 @@ ${FIXED_BRAND}`.trim();
 
   function renderJobTable(jobs, body, emptyText, showUrgency) {
     if (!jobs.length) {
-      body.innerHTML = `<tr><td colspan="10" class="empty">${emptyText}</td></tr>`;
+      body.innerHTML = `<tr><td colspan="11" class="empty">${emptyText}</td></tr>`;
       return;
     }
 
@@ -2746,6 +2766,7 @@ ${FIXED_BRAND}`.trim();
           <td class="job-route-cell">${jobRoutePartHtml(job, 'from')}</td>
           <td class="job-route-cell">${jobRoutePartHtml(job, 'to')}</td>
           <td class="job-vehicle-cell">${row.Car || '-'}</td>
+          <td class="people-cell">${row.Person || '-'}</td>
           <td class="job-price-cell">${jobPriceHtml(job)}</td>
           <td class="job-actions-cell"><div class="row-actions">
             <button class="btn-secondary mini-btn action-copy" onclick="copyRowText('${esc(row['Booking No'])}')">Kopyala</button>
@@ -2800,6 +2821,7 @@ ${FIXED_BRAND}`.trim();
           ${countdownLine}
           <div class="res-line"><strong>Uçuş:</strong> ${jobFlightHtml(job)}</div>
           ${routeContent}
+          <div class="res-line"><strong>Yolcu:</strong> ${row.Person || '-'} kişi</div>
           <div class="res-line"><strong>Car:</strong> ${row.Car || '-'}</div>
           <div class="res-line"><strong>Toplam:</strong> ${price} <span class="total-price-note">${priceNote}</span></div>
           <div class="res-actions">
